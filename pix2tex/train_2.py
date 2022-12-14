@@ -22,33 +22,44 @@ def train(args):
     valargs = args.copy()
     valargs.update(batchsize=args.testbatchsize, keep_smaller_batches=True, test=True)
     valdataloader.update(**valargs)
+
+    # add testdata in config file
+    testloader = Im2LatexDataset().load(args.testdata)
+    testloader.update(**args, test=False)
+
     device = args.device
     model = get_model(args)
     if torch.cuda.is_available() and not args.no_cuda:
         gpu_memory_check(model, args)
-    max_bleu, max_token_acc = 0, 0
+    val_max_bleu, val_max_token_acc = 0, 0
+    test_max_bleu, test_max_token_acc = 0, 0
     out_path = os.path.join(args.model_path, args.name)
     os.makedirs(out_path, exist_ok=True)
 
     if args.load_chkpt is not None:
         model.load_state_dict(torch.load(args.load_chkpt, map_location=device))
 
-    def save_models(e, step=0):
-        torch.save(model.state_dict(), os.path.join(out_path, '%s_e%02d_step%02d.pth' % (args.name, e+1, step)))
+    def save_models(e, step=0, test = False):
+        if test:
+            torch.save(model.state_dict(), os.path.join(out_path, '%s_e%02d_step%02d_test.pth' % (args.name, e+1, step)))
+        else:
+            torch.save(model.state_dict(), os.path.join(out_path, '%s_e%02d_step%02d.pth' % (args.name, e+1, step)))
         yaml.dump(dict(args), open(os.path.join(out_path, 'config.yaml'), 'w+'))
 
-    opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas, weight_decay = args.weight_decay)
+    opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas)
     scheduler = get_scheduler(args.scheduler)(opt, step_size=args.lr_step, gamma=args.gamma)
 
     microbatch = args.get('micro_batchsize', -1)
     if microbatch == -1:
         microbatch = args.batchsize
 
+    test_counter = 0
+
     try:
         for e in range(args.epoch, args.epochs):
             args.epoch = e
             dset = tqdm(iter(dataloader))
-            for i, (seq, im) in enumerate(dset):
+            for i, (seq, im) in enumerate(dset):    
                 if seq is not None and im is not None:
                     opt.zero_grad()
                     total_loss = 0
@@ -63,20 +74,35 @@ def train(args):
                     dset.set_description('Loss: %.4f' % total_loss)
                     if args.wandb:
                         wandb.log({'train/loss': total_loss})
+
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
-                    bleu_score, edit_distance, token_accuracy = evaluate(model, valdataloader, args, num_batches=int(args.valbatches*e/args.epochs), name='val')
-                    if bleu_score > max_bleu and token_accuracy > max_token_acc:
-                        max_bleu, max_token_acc = bleu_score, token_accuracy
-                        save_models(e, step=i)
+                    #validation testing
+                    test_counter += 1
+                    bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=int(args.valbatches*e/args.epochs), name='val')
+                    if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
+                        val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
+                        save_models(e, step=i, test = False)
+                        
+                #test model on testing set each 5 times after validation test
+                if test_counter == 5:  
+                    bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+                    if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+                        test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+                        if args.wandb:
+                            wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
+                        save_models(e, step=i, test = True)  
+                    test_counter = 0   
+                    
+            #save model after every epoch            
             if (e+1) % args.save_freq == 0:
-                save_models(e, step=len(dataloader))
+                save_models(e, step=len(dataloader), test = False)
             if args.wandb:
                 wandb.log({'train/epoch': e+1})
     except KeyboardInterrupt:
         if e >= 2:
             save_models(e, step=i)
         raise KeyboardInterrupt
-    save_models(e, step=len(dataloader))
+    save_models(e, step=len(dataloader), test = False)
 
 
 if __name__ == '__main__':

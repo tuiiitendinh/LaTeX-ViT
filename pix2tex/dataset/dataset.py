@@ -17,7 +17,6 @@ from pix2tex.utils.utils import in_model_path
 from pix2tex.dataset.transforms import train_transform, test_transform
 
 
-
 class Im2LatexDataset:
     keep_smaller_batches = False
     shuffle = True
@@ -34,7 +33,7 @@ class Im2LatexDataset:
     transform = train_transform
     data = defaultdict(lambda: [])
 
-    def __init__(self, equations=None, images=None, tokenizer=None, shuffle=True, batchsize=16, max_seq_len=1024,
+    def __init__(self, equations=None, images=None, tokenizer=None, shuffle=True, batchsize=16, max_seq_len=512,
                  max_dimensions=(1024, 512), min_dimensions=(32, 32), pad=False, keep_smaller_batches=False, test=False):
         """Generates a torch dataset from pairs of `equations` and `images`.
 
@@ -57,7 +56,10 @@ class Im2LatexDataset:
             self.images = [path.replace('\\', '/') for path in glob.glob(join(images, '*.png'))]
             self.sample_size = len(self.images)
             eqs = open(equations, 'r').read().split('\n')
+            
+            #indices được lấy theo số thứ tự ở trước .png, vì data được lọc lại nên sẽ có những bức ảnh được lấy từ 
             self.indices = [int(os.path.basename(img).split('.')[0]) for img in self.images]
+
             self.tokenizer = PreTrainedTokenizerFast(tokenizer_file=tokenizer)
             self.shuffle = shuffle
             self.batchsize = batchsize
@@ -79,7 +81,7 @@ class Im2LatexDataset:
             self._get_size()
 
             iter(self)
-
+            
     def __len__(self):
         return self.size
 
@@ -130,11 +132,22 @@ class Im2LatexDataset:
             return next(self)
         images = []
         for path in list(ims):
+            # pad_width, pad_height = 0, 0
             im = cv2.imread(path)
             if im is None:
                 print(path, 'not found!')
                 continue
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+            # height, width = im.shape[0], im.shape[1]
+            # if height % 16 != 0:
+            #     pad_height = 16 - (height % 16)
+
+            # if width % 16 != 0:
+            #     pad_width = 16 - (width % 16)
+            
+            # new_im = np.full((height + pad_height, width + pad_width, 3), 255,  dtype=np.uint8)
+            # new_im[:height,:width,:] = im
+            
             if not self.test:
                 # sometimes convert to bitmask
                 if np.random.random() < .04:
@@ -206,6 +219,16 @@ class Im2LatexDataset:
                 self.min_dimensions = kwargs['min_dimensions']
             temp = {}
             for k in self.data:
+                # print('------')
+                # print("min_dim_0: ", self.min_dimensions[0])
+                # print("image dim_0: ", k[0])
+                # print("max_dim_0: ", self.max_dimensions[0])
+                
+                # print('------')
+                # print("min_dim_1: ", self.min_dimensions[1])
+                # print("image dim:_1 ", k[1])
+                # print("max_dim_1: ", self.max_dimensions[1])
+                
                 if self.min_dimensions[0] <= k[0] <= self.max_dimensions[0] and self.min_dimensions[1] <= k[1] <= self.max_dimensions[1]:
                     temp[k] = self.data[k]
             self.data = temp
@@ -227,7 +250,7 @@ def generate_tokenizer(equations, output, vocab_size):
     tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
     trainer = BpeTrainer(special_tokens=["[PAD]", "[BOS]", "[EOS]"], vocab_size=vocab_size, show_progress=True)
     tokenizer.train(equations, trainer)
-    tokenizer.save(path=output, pretty=False)
+    tokenizer.save(path=output, pretty=True)
 
 
 if __name__ == '__main__':

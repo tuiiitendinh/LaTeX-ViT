@@ -14,14 +14,43 @@ class CustomVisionTransformer(VisionTransformer):
         self.patch_size = patch_size
 
     def forward_features(self, x):
+        # p#rint("\n")
         B, c, h, w = x.shape
+        # print("\ninput shape: ", x.shape)
+        
         x = self.patch_embed(x)
+        # print("\npatch embeded shape: ", x.shape)
 
         cls_tokens = self.cls_token.expand(B, -1, -1)  # stole cls_tokens impl from Phil Wang, thanks
+        # print("\nclass tokens shape: ", cls_tokens.shape)
+
         x = torch.cat((cls_tokens, x), dim=1)
+
         h, w = h//self.patch_size, w//self.patch_size
+        # print("\nheight // patch_size: ", h) #11
+        # print("width // patch_size: ", w) #34
+        # print("width ",self.width)
+        # print("self.patch_size ",self.patch_size)
+        # print("(self.width//self.patch_size-w): ", (self.width//self.patch_size-w))
+        # index 505 is out of bounds for dimension 0 with size 505
+        
+
+        # print(repeat(torch.arange(h)*(self.width//self.patch_size-w), 'h -> (h w)', w=w))
+        # print(len(repeat(torch.arange(h)*(self.width//self.patch_size-w), 'h -> (h w)', w=w)))
+        # print(torch.arange(h*w))
         pos_emb_ind = repeat(torch.arange(h)*(self.width//self.patch_size-w), 'h -> (h w)', w=w)+torch.arange(h*w)
-        pos_emb_ind = torch.cat((torch.zeros(1), pos_emb_ind+1), dim=0).long()
+        # print("\n pos_emb_ind when do repeat torch arrange: ", pos_emb_ind)
+        # print(pos_emb_ind)
+        # print("pos_emb_ind rearrange shape: ", pos_emb_ind.shape)
+
+        pos_emb_ind = torch.cat((torch.zeros(1), pos_emb_ind + 1), dim=0).long()
+        # print("\n pos_emb_ind when concat with zeros(1): ", pos_emb_ind)
+        # print('\n',pos_emb_ind)
+        # print("pos_emb_ind shape: ", self.pos_embed[:, pos_emb_ind].shape)
+        # print("\nself pos_emb_ind: ", self.pos_embed.shape)
+        # print("input shape after concat with class token: ", x.shape)
+        # print("\n")
+  
         x += self.pos_embed[:, pos_emb_ind]
         #x = x + self.pos_embed
         x = self.pos_drop(x)
