@@ -78,23 +78,25 @@ def train(args):
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
                     #validation testing
                     test_counter += 1
-                    model.eval()
-                    bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=int(args.valbatches*e/args.epochs), name='val')
-                    if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
-                        val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
-                        save_models(e, step=i, test = False)
+                    with torch.no_grad():
+                        model.eval()
+                        bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=int(args.valbatches*e/args.epochs), name='val')
+                        if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
+                            val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
+                            save_models(e, step=i, test = False)
                     model.train()
                         
                 #test model on testing set each 5 times after validation test
-                if test_counter == 5:  
-                    model.eval()
-                    bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
-                    if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
-                        test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
-                        if args.wandb:
-                            wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
-                        save_models(e, step=i, test = True)  
-                    test_counter = 0
+                if test_counter == 5:
+                    with torch.no_grad():
+                        model.eval()
+                        bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+                        if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+                            test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+                            if args.wandb:
+                                wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
+                            save_models(e, step=i, test = True)  
+                        test_counter = 0
                     model.train()
                     
             #save model after every epoch            
