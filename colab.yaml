@@ -8,7 +8,7 @@ betas:
 - 0.999
 bos_token: 1
 channels: 1
-data: /content/drive/MyDrive/LaTeX-OCR/pix2tex/dataset/data/weai_train.pkl
+data: /kaggle/working/LaTeX-ViT/pix2tex/dataset/data/weai_train.pkl
 debug: false
 decoder_args:
   attn_on_attn: true
@@ -26,7 +26,7 @@ gamma: 0.9995
 gpu_devices:
 - 0
 heads: 8
-id: im2latex_weai_ver4
+id: im2latex_weai_ver5
 load_chkpt: null
 lr: 0.001
 lr_step: 30
@@ -42,7 +42,7 @@ min_dimensions:
 min_height: 32
 min_width: 32
 model_path: checkpoints
-name: im2latex_weai_ver4
+name: im2latex_weai_ver5
 no_cuda: false
 num_layers: 4
 num_tokens: 8000
@@ -57,10 +57,10 @@ scheduler: StepLR
 seed: 42
 temperature: 0.2
 test_samples: 20
-testdata: /content/drive/MyDrive/LaTeX-OCR/pix2tex/dataset/data/weai_test.pkl
+testdata: /kaggle/working/LaTeX-ViT/pix2tex/dataset/data/weai_test.pkl
 testbatchsize: 1000
-tokenizer: pix2tex/model/dataset/weai_tokenizer.json
+tokenizer: /kaggle/working/LaTeX-ViT/pix2tex/model/dataset/weai_tokenizer.json
 valbatches: 100
-valdata: /content/drive/MyDrive/LaTeX-OCR/pix2tex/dataset/data/weai_valid.pkl
-weight_decay: 0.01
+valdata: /kaggle/working/LaTeX-ViT/pix2tex/dataset/data/weai_valid.pkl
+weight_decay: 0.05
 wandb: true
