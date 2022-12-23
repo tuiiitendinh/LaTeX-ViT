@@ -22,7 +22,7 @@ dim: 256
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epoch: 14
+epoch: 28
 epochs: 50
 gamma: 0.9995
 gpu_devices:
@@ -30,8 +30,8 @@ gpu_devices:
 - 1
 heads: 8
 id: 2m300ose
-load_chkpt: /kaggle/working/LaTeX-ViT/checkpoints/im2latex_weai_ver5/im2latex_weai_ver5_e15_step2995_test.pth
-lr: 0.001
+load_chkpt: /kaggle/working/LaTeX-ViT/checkpoints/im2latex_weai_ver5/im2latex_weai_ver5_e28_step9786.pth
+lr: 0.0001
 lr_step: 30
 max_dimensions:
 - 992
@@ -67,4 +67,4 @@ tokenizer: /kaggle/working/LaTeX-ViT/pix2tex/model/dataset/weai_tokenizer.json
 valbatches: 100
 valdata: /kaggle/working/LaTeX-ViT/pix2tex/dataset/data/weai_valid.pkl
 wandb: true
-weight_decay: 0.05
+weight_decay: 0.005
