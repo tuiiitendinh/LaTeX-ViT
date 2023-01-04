@@ -142,7 +142,7 @@ class Im2LatexDataset:
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
             
             ## pad image to the multiple of patch_size (16)
-            h, w = im.shape[2:]
+            h, w = im.shape[0], im.shape[1]
             h_pad = self.patch_size - h % self.patch_size
             w_pad = self.patch_size - w % self.patch_size
             
