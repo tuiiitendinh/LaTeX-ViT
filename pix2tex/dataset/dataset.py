@@ -151,7 +151,7 @@ class Im2LatexDataset:
             if not self.test:
                 # sometimes convert to bitmask
                 if np.random.random() < .04:
-                    new_im[im != 255] = 0
+                    new_im[new_im != 255] = 0
             images.append(self.transform(image=new_im)['image'][:1])
         try:
             images = torch.cat(images).float().unsqueeze(1)
