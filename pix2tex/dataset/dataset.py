@@ -21,7 +21,8 @@ class Im2LatexDataset:
     keep_smaller_batches = False
     shuffle = True
     batchsize = 16
-    max_dimensions = (1024, 512)
+    patch_size = 16
+    max_dimensions = (992, 496)
     min_dimensions = (32, 32)
     max_seq_len = 1024
     pad_token = "[PAD]"
@@ -34,7 +35,7 @@ class Im2LatexDataset:
     data = defaultdict(lambda: [])
 
     def __init__(self, equations=None, images=None, tokenizer=None, shuffle=True, batchsize=16, max_seq_len=512,
-                 max_dimensions=(1024, 512), min_dimensions=(32, 32), pad=False, keep_smaller_batches=False, test=False):
+                 max_dimensions=(992, 496), min_dimensions=(32, 32), patch_size = 16, pad=False, keep_smaller_batches=False, test=False):
         """Generates a torch dataset from pairs of `equations` and `images`.
 
         Args:
@@ -64,6 +65,7 @@ class Im2LatexDataset:
             self.shuffle = shuffle
             self.batchsize = batchsize
             self.max_seq_len = max_seq_len
+            self.patch_size = patch_size
             self.max_dimensions = max_dimensions
             self.min_dimensions = min_dimensions
             self.pad = pad
@@ -138,21 +140,19 @@ class Im2LatexDataset:
                 print(path, 'not found!')
                 continue
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-            # height, width = im.shape[0], im.shape[1]
-            # if height % 16 != 0:
-            #     pad_height = 16 - (height % 16)
+            
+            ## pad image to the multiple of patch_size (16)
+            h, w = im.shape[2:]
+            h_pad = self.patch_size - h % self.patch_size
+            w_pad = self.patch_size - w % self.patch_size
+            
+            new_im = np.pad(im, ((0, h_pad), (0, w_pad), (0, 0)), mode='constant', constant_values=255)
 
-            # if width % 16 != 0:
-            #     pad_width = 16 - (width % 16)
-            
-            # new_im = np.full((height + pad_height, width + pad_width, 3), 255,  dtype=np.uint8)
-            # new_im[:height,:width,:] = im
-            
             if not self.test:
                 # sometimes convert to bitmask
                 if np.random.random() < .04:
-                    im[im != 255] = 0
-            images.append(self.transform(image=im)['image'][:1])
+                    new_im[im != 255] = 0
+            images.append(self.transform(image=new_im)['image'][:1])
         try:
             images = torch.cat(images).float().unsqueeze(1)
         except RuntimeError:

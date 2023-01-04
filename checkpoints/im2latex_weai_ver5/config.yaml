@@ -22,7 +22,7 @@ dim: 256
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epoch: 49
+epoch: 50
 epochs: 100
 gamma: 0.9995
 gpu_devices:
