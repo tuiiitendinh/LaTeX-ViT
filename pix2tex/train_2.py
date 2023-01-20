@@ -11,6 +11,7 @@ import wandb
 import torch.nn as nn
 from pix2tex.eval import evaluate
 from pix2tex.models import get_model
+from torch.optim.lr_scheduler import OneCycleLR
 # from pix2tex.utils import *
 from pix2tex.utils import in_model_path, parse_args, seed_everything, get_optimizer, get_scheduler, gpu_memory_check
 
@@ -41,13 +42,27 @@ def train(args):
 
     def save_models(e, step=0, test = False):
         if test:
-            torch.save(model.state_dict(), os.path.join(out_path, '%s_e%02d_step%02d_test.pth' % (args.name, e+1, step)))
+            filename = os.path.join(out_path, '%s_e%02d_step%02d_test.pth' % (args.name, e+1, step))
         else:
-            torch.save(model.state_dict(), os.path.join(out_path, '%s_e%02d_step%02d.pth' % (args.name, e+1, step)))
+            filename = os.path.join(out_path, '%s_e%02d_step%02d.pth' % (args.name, e+1, step))
+        
+        # print("Name: ", filename)
+        # print("Model: ", model.state_dict())
+        torch.save(model.state_dict(), filename)
+        # torch.save(model.state_dict(), "test_1.pth")
+        
         yaml.dump(dict(args), open(os.path.join(out_path, 'config.yaml'), 'w+'))
-
-    opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas)
-    scheduler = get_scheduler(args.scheduler)(opt, step_size=args.lr_step, gamma=args.gamma)
+        print("Saved model at: ", filename)
+        
+    if args.optimizer == 'Adam':
+        opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas)
+    elif args.optimizer == 'AdamW':
+        opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas, eps=args.eps, weight_decay=args.weight_decay)
+    
+    if args.scheduler == 'StepLR':
+        scheduler = get_scheduler(args.scheduler)(opt, step_size=args.lr_step, gamma=args.gamma)
+    elif args.scheduler == 'OneCycleLR':
+        scheduler = get_scheduler(args.scheduler)(opt, max_lr=args.lr, pct_start=args.pct_start, total_steps=round(int(len(dataloader)*args.epochs)))
 
     microbatch = args.get('micro_batchsize', -1)
     if microbatch == -1:
@@ -59,6 +74,10 @@ def train(args):
         for e in range(args.epoch, args.epochs):
             args.epoch = e
             dset = tqdm(iter(dataloader))
+
+            #resets the memory allocation tracker at the beginning of each epoch
+            torch.cuda.reset_max_memory_allocated()
+
             for i, (seq, im) in enumerate(dset):    
                 if seq is not None and im is not None:
                     opt.zero_grad()
@@ -74,6 +93,10 @@ def train(args):
                     dset.set_description('Loss: %.4f' % total_loss)
                     if args.wandb:
                         wandb.log({'train/loss': total_loss})
+                        wandb.log({'train/lr': scheduler.get_last_lr()[0]})
+                    
+                    #releases unoccupied memory at the end of each iteration
+                    torch.cuda.empty_cache()    
 
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
                     #validation testing
@@ -98,7 +121,6 @@ def train(args):
                             save_models(e, step=i, test = True)  
                         test_counter = 0
                     model.train()
-                    
             #save model after every epoch            
             if (e+1) % args.save_freq == 0:
                 save_models(e, step=len(dataloader), test = False)
