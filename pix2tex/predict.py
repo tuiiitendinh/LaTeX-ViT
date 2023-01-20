@@ -1,5 +1,4 @@
 import yaml
-import base64
 import cv2
 import numpy as np
 import torch
@@ -11,9 +10,9 @@ from pix2tex.utils import post_process, token2str
 from munch import Munch
 
 
-config_pth = '/content/drive/MyDrive/LaTeX-OCR/checkpoints/im2latex_weai_ver4/config.yaml'
-tokenizer_pth = '/content/drive/MyDrive/LaTeX-OCR/pix2tex/model/dataset/weai_tokenizer.json'
-model_pth = '/content/drive/MyDrive/LaTeX-OCR/checkpoints/im2latex_weai_ver4/im2latex_weai_ver4_e22_step1389.pth'
+config_pth = ''
+tokenizer_pth = '' 
+model_pth = ''
 
 with open(config_pth) as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
