@@ -1,11 +1,13 @@
-gpu_devices: null #[0,1,2,3,4,5,6,7]
+gpu_devices:
+- 0
+- 1
 betas:
 - 0.9
 - 0.999
-batchsize: 64
+batchsize: 32
 bos_token: 1
 channels: 1
-data: dataset/data/train.pkl
+data: pix2tex/dataset/data/train.pkl
 debug: false
 decoder_args:
   attn_on_attn: true
@@ -14,34 +16,41 @@ decoder_args:
   rel_pos_bias: false
   use_scalenorm: false
 dim: 256
+device: cuda
 emb_dropout: 0
 encoder_depth: 4
 eos_token: 2
-epochs: 10
+epochs: 20
 gamma: 0.9995
 heads: 8
 id: null
 load_chkpt: null
-lr: 0.0005
+lr: 0.0001
 lr_step: 30
-max_height: 192
 max_seq_len: 512
-max_width: 672
+max_dimensions:
+- 992
+- 496
+max_height: 496
+max_width: 992
 min_height: 32
 min_width: 32
+min_dimensions:
+- 32
+- 32
 micro_batchsize: -1
-model_path: checkpoints_add
-name: pix2tex-vit
+model_path: checkpoints_vit_teacher
+name: vit_teacher
 num_layers: 4
 num_tokens: 8000
-optimizer: Adam
+optimizer: AdamW
 output_path: outputs
 pad: false
 pad_token: 0
 patch_size: 16
 sample_freq: 1000
 save_freq: 5
-scheduler: StepLR
+scheduler: OneCycleLR
 seed: 42
 encoder_structure: vit
 temperature: 0.2
