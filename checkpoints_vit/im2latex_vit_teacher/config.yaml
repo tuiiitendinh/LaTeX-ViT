@@ -3,7 +3,7 @@ backbone_layers:
 - 2
 - 3
 - 7
-batchsize: 16
+batchsize: 10
 betas:
 - 0.9
 - 0.999
