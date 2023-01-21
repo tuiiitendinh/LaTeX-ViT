@@ -24,8 +24,8 @@ div_factor: 12
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epoch: 3
-epochs: 10
+epoch: 9
+epochs: 15
 eps: 0.00000001
 final_div_factor: 100
 gamma: 0.9995
@@ -34,7 +34,7 @@ gpu_devices:
 - 1
 heads: 8
 id: 2ru1umf0
-load_chkpt: /kaggle/working/im2latex_vit_teacher_e04_step8227_test.pth
+load_chkpt: /kaggle/working/im2latex_vit_teacher_e08_step13934_test.pth
 lr: 0.0001
 lr_step: 30
 max_dimensions:
