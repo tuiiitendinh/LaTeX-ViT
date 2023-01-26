@@ -3,13 +3,13 @@ backbone_layers:
 - 2
 - 3
 - 7
-batchsize: 10
+batchsize: 12
 betas:
 - 0.9
 - 0.999
 bos_token: 1
 channels: 1
-config: /kaggle/working/LaTeX-ViT/model/settings/config-hybrid.yaml
+config: /kaggle/working/LaTeX-ViT/checkpoints_vit/im2latex_vit_teacher/config.yaml
 data: pix2tex/model/dataset/weai_train.pkl
 debug: false
 decoder_args:
@@ -24,8 +24,8 @@ div_factor: 12
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epoch: 9
-epochs: 15
+epoch: 13
+epochs: 17
 eps: 0.00000001
 final_div_factor: 100
 gamma: 0.9995
@@ -34,14 +34,14 @@ gpu_devices:
 - 1
 heads: 8
 id: 2ru1umf0
-load_chkpt: /kaggle/working/im2latex_vit_teacher_e08_step13934_test.pth
+load_chkpt: /kaggle/working/im2latex_vit_teacher_e13_step19255.pth
 lr: 0.0001
 lr_step: 30
 max_dimensions:
 - 992
 - 496
 max_height: 496
-max_lr: 0.001
+max_lr: 0.0001
 max_seq_len: 512
 max_width: 992
 min_dimensions:
@@ -59,7 +59,7 @@ output_path: outputs
 pad: false
 pad_token: 0
 patch_size: 16
-pct_start: 0.3
+pct_start: 0.25
 resume: false
 sample_freq: 2000
 save_freq: 1
