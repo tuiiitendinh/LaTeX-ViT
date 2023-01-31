@@ -72,5 +72,5 @@ testdata: pix2tex/model/dataset/weai_test.pkl
 tokenizer: pix2tex/model/dataset/weai_tokenizer.json
 valbatches: 100
 valdata: pix2tex/model/dataset/weai_valid.pkl
-wandb: true
+wandb: false
 weight_decay: 0.01
