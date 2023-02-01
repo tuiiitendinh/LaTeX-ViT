@@ -21,7 +21,7 @@ dim: 256
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epochs: 30
+epochs: 50
 gamma: 0.9995
 gpu_devices:
 - 0
@@ -72,7 +72,7 @@ weight_decay: 0.01
 
 #OneCycleLR
 max_lr: 0.001
-pct_start: 0.3
+pct_start: 0.25
 anneal_strategy: cos
 div_factor: 12
 final_div_factor: 100

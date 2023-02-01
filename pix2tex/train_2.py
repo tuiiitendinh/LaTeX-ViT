@@ -78,7 +78,7 @@ def train(args):
     if args.scheduler == 'StepLR':
         scheduler = get_scheduler(args.scheduler)(opt, step_size=args.lr_step, gamma=args.gamma)
     elif args.scheduler == 'OneCycleLR':
-        scheduler = get_scheduler(args.scheduler)(opt, max_lr=args.lr, pct_start=args.pct_start, total_steps=round(int(len(dataloader)*args.epochs)))
+        scheduler = get_scheduler(args.scheduler)(opt, max_lr=args.max_lr, pct_start=args.pct_start, total_steps=round(int(len(dataloader)*args.epochs)))
 
     microbatch = args.get('micro_batchsize', -1)
     if microbatch == -1:
@@ -115,8 +115,7 @@ def train(args):
                     torch.cuda.empty_cache()  
 
                 #save model after every epoch            
-                if (e+1) % args.save_freq == 0:
-                    save_models()
+                # if (e+1) % args.save_freq == 0:
 
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
                     test_counter += 1
@@ -137,7 +136,8 @@ def train(args):
                     #     test_counter = 0
                     # model.train()
 
-            
+            #save model after every epochs
+            save_models()
             if args.wandb:
                 wandb.log({'train/epoch': e+1})
     except KeyboardInterrupt:
