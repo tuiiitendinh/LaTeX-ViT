@@ -21,7 +21,7 @@ dim: 256
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epochs: 10
+epochs: 30
 gamma: 0.9995
 gpu_devices:
 - 0
@@ -42,7 +42,7 @@ min_dimensions:
 min_height: 32
 min_width: 32
 model_path: checkpoints_vit
-name: im2latex_vit_teacher
+name: test_01-02
 no_cuda: false
 num_layers: 4
 num_tokens: 8000
