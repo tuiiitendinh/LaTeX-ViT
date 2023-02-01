@@ -11,10 +11,26 @@ import wandb
 import torch.nn as nn
 from pix2tex.eval import evaluate
 from pix2tex.models import get_model
-from torch.optim.lr_scheduler import OneCycleLR
 # from pix2tex.utils import *
 from pix2tex.utils import in_model_path, parse_args, seed_everything, get_optimizer, get_scheduler, gpu_memory_check
 
+def validation_testing(args, dataloader, e = None):
+    test_counter += 1
+    model = get_model(args)
+    model.load_state_dict(torch.load(os.path.join(args.model_path, args.name, "test.pth")), map_location=args.device)
+    
+    if e is not None:
+        num_batches = int(args.valbatches*e/args.epochs)
+        name = 'val'
+    else:
+        num_batches = args.testbatchsize
+        name = 'test'
+
+    with torch.no_grad():
+        bleu_score, edit_distance, token_accuracy = evaluate(model, dataloader, args, num_batches=num_batches, name=name)
+
+    if args.wandb:
+        wandb.log({ f'{name}/bleu': bleu_score, f'{name}/edit_distance': edit_distance, f'{name}/token_accuracy': token_accuracy})
 
 def train(args):
     dataloader = Im2LatexDataset().load(args.data)
@@ -32,20 +48,20 @@ def train(args):
     model = get_model(args)
     if torch.cuda.is_available() and not args.no_cuda:
         gpu_memory_check(model, args)
-    val_max_bleu, val_max_token_acc = 0, 0
-    test_max_bleu, test_max_token_acc = 0, 0
+    # val_max_bleu, val_max_token_acc = 0, 0
+    # test_max_bleu, test_max_token_acc = 0, 0
     out_path = os.path.join(args.model_path, args.name)
     os.makedirs(out_path, exist_ok=True)
 
     if args.load_chkpt is not None:
         model.load_state_dict(torch.load(args.load_chkpt, map_location=device))
 
-    def save_models(e, step=0, test = False):
-        if test:
-            filename = os.path.join(out_path, '%s_e%02d_step%02d_test.pth' % (args.name, e+1, step))
-        else:
-            filename = os.path.join(out_path, '%s_e%02d_step%02d.pth' % (args.name, e+1, step))
-        
+    def save_models():
+        # if test:
+        #     filename = os.path.join(out_path, '%s_e%02d_step%02d_test.pth' % (args.name, e+1, step))
+        # else:
+        #     filename = os.path.join(out_path, '%s_e%02d_step%02d.pth' % (args.name, e+1, step))
+        filename = os.path.join(out_path, "test.pth")
         # print("Name: ", filename)
         # print("Model: ", model.state_dict())
         torch.save(model.state_dict(), filename)
@@ -96,41 +112,39 @@ def train(args):
                         wandb.log({'train/lr': scheduler.get_last_lr()[0]})
                     
                     #releases unoccupied memory at the end of each iteration
-                    torch.cuda.empty_cache()    
+                    torch.cuda.empty_cache()  
+
+                #save model after every epoch            
+                if (e+1) % args.save_freq == 0:
+                    save_models()
 
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
-                    #validation testing
                     test_counter += 1
-                    with torch.no_grad():
-                        model.eval()
-                        bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=int(args.valbatches*e/args.epochs), name='val')
-                        if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
-                            val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
-                            save_models(e, step=i, test = False)
-                    model.train()
+                    validation_testing(args, valdataloader, e)
+
+                    
                         
                 #test model on testing set each 5 times after validation test
                 if test_counter == 5:
-                    with torch.no_grad():
-                        model.eval()
-                        bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
-                        if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
-                            test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
-                            if args.wandb:
-                                wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
-                            save_models(e, step=i, test = True)  
-                        test_counter = 0
-                    model.train()
-            #save model after every epoch            
-            if (e+1) % args.save_freq == 0:
-                save_models(e, step=len(dataloader), test = False)
+                    validation_testing(args, testloader, e)
+                    test_counter = 0
+                    # with torch.no_grad():
+                    #     model.eval()
+                    #     bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+                    #     if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+                    #         test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+                    #                                     save_models(e, step=i, test = True)  
+                    #     test_counter = 0
+                    # model.train()
+
+            
             if args.wandb:
                 wandb.log({'train/epoch': e+1})
     except KeyboardInterrupt:
         if e >= 2:
             save_models(e, step=i)
         raise KeyboardInterrupt
-    save_models(e, step=len(dataloader), test = False)
+    save_models()
 
 
 if __name__ == '__main__':
