@@ -142,7 +142,7 @@ def train(args):
                 wandb.log({'train/epoch': e+1})
     except KeyboardInterrupt:
         if e >= 2:
-            save_models(e, step=i)
+            save_models()
         raise KeyboardInterrupt
     save_models()
 
