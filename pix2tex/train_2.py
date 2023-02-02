@@ -117,18 +117,11 @@ def train(args):
 
                 # if (i+1+len(dataloader)*e) % args.sample_freq == 0:
 
-                valid_counter += 1
-                if valid_counter == 2:
-                    test_counter += 1
-                    valid_counter = 0
-                    validation_testing(args, valdataloader, e)
 
                     
                         
                 #test model on testing set each 5 times after validation test
-                if test_counter == 5:
-                    validation_testing(args, testloader)
-                    test_counter = 0
+                
                     # with torch.no_grad():
                     #     model.eval()
                     #     bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
@@ -140,6 +133,17 @@ def train(args):
 
             #save model after every epochs
             save_models()
+
+            valid_counter += 1
+            if valid_counter == 2:
+                test_counter += 1
+                valid_counter = 0
+                validation_testing(args, valdataloader, e)
+            
+            if test_counter == 5:
+                validation_testing(args, testloader)
+                test_counter = 0
+
             if args.wandb:
                 wandb.log({'train/epoch': e+1})
     except KeyboardInterrupt:
