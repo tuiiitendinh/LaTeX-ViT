@@ -2,7 +2,7 @@ backbone_layers:
 - 2
 - 3
 - 7
-batchsize: 32
+batchsize: 64
 betas:
 - 0.9
 - 0.999
@@ -21,7 +21,7 @@ dim: 256
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epochs: 60
+epochs: 50
 gamma: 0.9995
 gpu_devices:
 - 0
