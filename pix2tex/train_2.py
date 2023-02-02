@@ -29,7 +29,7 @@ def validation_testing(args, dataloader, e = None):
         bleu_score, edit_distance, token_accuracy = evaluate(model, dataloader, args, num_batches=num_batches, name=name)
 
     if args.wandb:
-        wandb.log({ f'{name}/bleu': bleu_score, f'{name}/edit_distance': edit_distance, f'{name}/token_accuracy': token_accuracy})
+        wandb.log({f'{name}/bleu': bleu_score, f'{name}/edit_distance': edit_distance, f'{name}/token_accuracy': token_accuracy})
 
 def train(args):
     dataloader = Im2LatexDataset().load(args.data)
