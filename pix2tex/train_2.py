@@ -133,17 +133,22 @@ def train(args):
 
             #save model after every epochs
             save_models()
-
-            valid_counter += 1
+            # call validation_testing function after every 2 epochs
             if valid_counter == 2:
-                test_counter += 1
                 valid_counter = 0
+                test_counter += 1
                 validation_testing(args, valdataloader, e)
+            else:
+                valid_counter += 1
             
+            #call validation_testing function with testloader, no epoch after every 5 epochs
             if test_counter == 5:
-                validation_testing(args, testloader)
                 test_counter = 0
+                validation_testing(args, testloader)
+            
 
+        
+            
             if args.wandb:
                 wandb.log({'train/epoch': e+1})
     except KeyboardInterrupt:
