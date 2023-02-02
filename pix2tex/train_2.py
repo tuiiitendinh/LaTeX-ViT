@@ -16,7 +16,7 @@ from pix2tex.utils import in_model_path, parse_args, seed_everything, get_optimi
 
 def validation_testing(args, dataloader, e = None):
     model = get_model(args)
-    model.load_state_dict(torch.load(os.path.join(args.model_path, args.name, "test.pth")), map_location=args.device)
+    model.load_state_dict(torch.load(os.path.join(args.model_path, args.name, "test.pth")))
     
     if e is not None:
         num_batches = int(args.valbatches*e/args.epochs)
