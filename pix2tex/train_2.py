@@ -15,7 +15,6 @@ from pix2tex.models import get_model
 from pix2tex.utils import in_model_path, parse_args, seed_everything, get_optimizer, get_scheduler, gpu_memory_check
 
 def validation_testing(args, dataloader, e = None):
-    test_counter += 1
     model = get_model(args)
     model.load_state_dict(torch.load(os.path.join(args.model_path, args.name, "test.pth")), map_location=args.device)
     
