@@ -124,7 +124,7 @@ def train(args):
                         
                 #test model on testing set each 5 times after validation test
                 if test_counter == 5:
-                    validation_testing(args, testloader, e)
+                    validation_testing(args, testloader)
                     test_counter = 0
                     # with torch.no_grad():
                     #     model.eval()
