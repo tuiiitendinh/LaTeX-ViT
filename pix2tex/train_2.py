@@ -82,6 +82,7 @@ def train(args):
         microbatch = args.batchsize
 
     test_counter = 0
+    valid_counter = 0
 
     try:
         for e in range(args.epoch, args.epochs):
@@ -114,8 +115,12 @@ def train(args):
                 #save model after every epoch            
                 # if (e+1) % args.save_freq == 0:
 
-                if (i+1+len(dataloader)*e) % args.sample_freq == 0:
+                # if (i+1+len(dataloader)*e) % args.sample_freq == 0:
+
+                valid_counter += 1
+                if valid_counter == 2:
                     test_counter += 1
+                    valid_counter = 0
                     validation_testing(args, valdataloader, e)
 
                     
