@@ -116,10 +116,7 @@ def train(args):
                 # if (e+1) % args.save_freq == 0:
 
                 # if (i+1+len(dataloader)*e) % args.sample_freq == 0:
-
-
-                    
-                        
+            
                 #test model on testing set each 5 times after validation test
                 
                     # with torch.no_grad():
@@ -134,7 +131,7 @@ def train(args):
             #save model after every epochs
             save_models()
             # call validation_testing function after every 2 epochs
-            if valid_counter == 2:
+            if valid_counter == 1:
                 valid_counter = 0
                 test_counter += 1
                 validation_testing(args, valdataloader, e)
@@ -142,12 +139,9 @@ def train(args):
                 valid_counter += 1
             
             #call validation_testing function with testloader, no epoch after every 5 epochs
-            if test_counter == 5:
+            if test_counter == 4:
                 test_counter = 0
                 validation_testing(args, testloader)
-            
-
-        
             
             if args.wandb:
                 wandb.log({'train/epoch': e+1})
