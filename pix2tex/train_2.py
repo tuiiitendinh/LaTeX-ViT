@@ -19,7 +19,7 @@ def validation_testing(args, dataloader, e = None):
     model.load_state_dict(torch.load(os.path.join(args.model_path, args.name, "test.pth")))
     
     if e is not None:
-        num_batches = int(args.valbatches*e/args.epochs)
+        num_batches = args.valbatches
         name = 'val'
     else:
         num_batches = args.testbatchsize
