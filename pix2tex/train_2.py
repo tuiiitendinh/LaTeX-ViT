@@ -92,25 +92,25 @@ def train(args):
             #resets the memory allocation tracker at the beginning of each epoch
             torch.cuda.reset_max_memory_allocated()
 
-            for i, (seq, im) in enumerate(dset):    
-                if seq is not None and im is not None:
-                    opt.zero_grad()
-                    total_loss = 0
-                    for j in range(0, len(im), microbatch):
-                        tgt_seq, tgt_mask = seq['input_ids'][j:j+microbatch].to(device), seq['attention_mask'][j:j+microbatch].bool().to(device)
-                        loss = model.data_parallel(im[j:j+microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask)*microbatch/args.batchsize
-                        loss.backward()  # data parallism loss is a vector
-                        total_loss += loss.item()
-                        torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
-                    opt.step()
-                    scheduler.step()
-                    dset.set_description('Loss: %.4f' % total_loss)
-                    if args.wandb:
-                        wandb.log({'train/loss': total_loss})
-                        wandb.log({'train/lr': scheduler.get_last_lr()[0]})
+            # for i, (seq, im) in enumerate(dset):    
+                # if seq is not None and im is not None:
+                #     opt.zero_grad()
+                #     total_loss = 0
+                #     for j in range(0, len(im), microbatch):
+                #         tgt_seq, tgt_mask = seq['input_ids'][j:j+microbatch].to(device), seq['attention_mask'][j:j+microbatch].bool().to(device)
+                #         loss = model.data_parallel(im[j:j+microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask)*microbatch/args.batchsize
+                #         loss.backward()  # data parallism loss is a vector
+                #         total_loss += loss.item()
+                #         torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
+                #     opt.step()
+                #     scheduler.step()
+                #     dset.set_description('Loss: %.4f' % total_loss)
+                #     if args.wandb:
+                #         wandb.log({'train/loss': total_loss})
+                #         wandb.log({'train/lr': scheduler.get_last_lr()[0]})
                     
-                    #releases unoccupied memory at the end of each iteration
-                    torch.cuda.empty_cache()  
+                #     #releases unoccupied memory at the end of each iteration
+                #     torch.cuda.empty_cache()  
 
                 #save model after every epoch            
                 # if (e+1) % args.save_freq == 0:
@@ -129,27 +129,30 @@ def train(args):
                     # model.train()
 
             #save model after every epochs
-            save_models()
+            # save_models()
             # call validation_testing function after every 2 epochs
             if valid_counter == 1:
                 valid_counter = 0
                 test_counter += 1
+                print("----- Validation Testing -----")
                 validation_testing(args, valdataloader, e)
-            else:
-                valid_counter += 1
+            # else:
+            #     valid_counter += 1
             
-            #call validation_testing function with testloader, no epoch after every 5 epochs
+            # #call validation_testing function with testloader, no epoch after every 5 epochs
             if test_counter == 4:
                 test_counter = 0
+                print("----- Testing on Public Test set -----")
                 validation_testing(args, testloader)
             
-            if args.wandb:
-                wandb.log({'train/epoch': e+1})
+            # if args.wandb:
+            #     wandb.log({'train/epoch': e+1})
     except KeyboardInterrupt:
-        if e >= 2:
-            save_models()
-        raise KeyboardInterrupt
-    save_models()
+        pass
+    #     if e >= 2:
+    #         save_models()
+    #     raise KeyboardInterrupt
+    # save_models()
 
 
 if __name__ == '__main__':
