@@ -1,13 +1,14 @@
-gpu_devices:
-- 0
-- 1
+backbone_layers:
+- 2
+- 3
+- 7
+batchsize: 10
 betas:
 - 0.9
 - 0.999
-batchsize: 32
 bos_token: 1
 channels: 1
-data: pix2tex/dataset/data/train.pkl
+data: 
 debug: false
 decoder_args:
   attn_on_attn: true
@@ -15,32 +16,35 @@ decoder_args:
   ff_glu: true
   rel_pos_bias: false
   use_scalenorm: false
+device: cuda:0
 dim: 256
-device: cuda
-emb_dropout: 0
 encoder_depth: 4
+encoder_structure: hybrid
 eos_token: 2
-epochs: 20
+epochs: 80
 gamma: 0.9995
+gpu_devices:
+- 0
+- 1
 heads: 8
-id: null
+id: im2latex_weai_ver5
 load_chkpt: null
-lr: 0.0001
+lr: 0.001
 lr_step: 30
-max_seq_len: 512
 max_dimensions:
-- 992
+- 992 
 - 496
 max_height: 496
+max_seq_len: 512
 max_width: 992
-min_height: 32
-min_width: 32
 min_dimensions:
 - 32
 - 32
-micro_batchsize: -1
-model_path: checkpoints_vit_teacher
-name: vit_teacher
+min_height: 32
+min_width: 32
+model_path: checkpoints_vit
+name: im2latex_vit_teacher
+no_cuda: false
 num_layers: 4
 num_tokens: 8000
 optimizer: AdamW
@@ -48,14 +52,16 @@ output_path: outputs
 pad: false
 pad_token: 0
 patch_size: 16
-sample_freq: 1000
-save_freq: 5
-scheduler: OneCycleLR
+sample_freq: 2000
+save_freq: 1
+scheduler: StepLR
 seed: 42
-encoder_structure: vit
 temperature: 0.2
-test_samples: 5
-testbatchsize: 20
-tokenizer: dataset/tokenizer.json
+test_samples: 20
+testdata: 
+testbatchsize: 1000
+tokenizer: 
 valbatches: 100
-valdata: dataset/data/val.pkl
+valdata: 
+weight_decay: 0.05
+wandb: true
