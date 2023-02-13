@@ -61,3 +61,31 @@ At the beginning of the training process, you will asked to enter your wandb API
 If you already have a wandb account, you can get your API key from the link provided when run the command in step 3.
 
 Else, you can set the argument `wandb` to False in the config file to disable wandb logging.
+
+
+## Generating data for training
+* train.pkl which is contains 100k images from 5 datasets
+```
+python -m pix2tex.dataset.dataset -i /kaggle/working/im2tex_data/weai_data/weai_train_20k /kaggle/working/im2tex_data/Euler_fonts/Euler_train_20k /kaggle/working/im2tex_data/KaTeX_data/Katex_train_20k /kaggle/working/im2tex_data/im2latex-170k/im170_train_20k /kaggle/working/im2tex_data/lukas_data/pdfmath/pdfmath_train20k -e /kaggle/working/im2tex_data/weai_data/labels_weai.txt /kaggle/working/im2tex_data/Euler_fonts/euler_labels.txt /kaggle/working/im2tex_data/KaTeX_data/katex_labels.txt /kaggle/working/im2tex_data/im2latex-170k/formulas.txt /kaggle/working/im2tex_data/lukas_data/pdfmath/pdfmath.txt -o pix2tex/model/dataset/weai_train.pkl
+```
+
+* valid.pkl which is contains 10k images from 5 datasets
+```
+python -m pix2tex.dataset.dataset -i /kaggle/working/im2tex_data/weai_data/weai_valid /kaggle/working/im2tex_data/Euler_fonts/Euler_valid /kaggle/working/im2tex_data/KaTeX_data/Katex_valid /kaggle/working/im2tex_data/im2latex-170k/im170_valid /kaggle/working/im2tex_data/lukas_data/pdfmath/pdfmath_valid -e /kaggle/working/im2tex_data/weai_data/labels_weai.txt /kaggle/working/im2tex_data/Euler_fonts/euler_labels.txt /kaggle/working/im2tex_data/KaTeX_data/katex_labels.txt /kaggle/working/im2tex_data/im2latex-170k/formulas.txt /kaggle/working/im2tex_data/lukas_data/pdfmath/pdfmath.txt -o pix2tex/model/dataset/weai_valid.pkl
+```
+
+* test.pkl which is contains 5k images from 5 datasets
+```
+python -m pix2tex.dataset.dataset -i /kaggle/working/im2tex_data/weai_data/weai_test /kaggle/working/im2tex_data/Euler_fonts/Euler_test /kaggle/working/im2tex_data/KaTeX_data/Katex_test /kaggle/working/im2tex_data/im2latex-170k/im170_test /kaggle/working/im2tex_data/lukas_data/pdfmath/pdfmath_test -e /kaggle/working/im2tex_data/weai_data/labels_weai.txt /kaggle/working/im2tex_data/Euler_fonts/euler_labels.txt /kaggle/working/im2tex_data/KaTeX_data/katex_labels.txt /kaggle/working/im2tex_data/im2latex-170k/formulas.txt /kaggle/working/im2tex_data/lukas_data/pdfmath/pdfmath.txt -o pix2tex/model/dataset/weai_test.pkl
+```
+
+* tokenizer.json with vocab size 8000
+```
+python -m pix2tex.dataset.dataset -e /kaggle/working/im2tex_data/weai_data/labels_weai.txt /kaggle/working/im2tex_data/Euler_fonts/euler_labels.txt /kaggle/working/im2tex_data/KaTeX_data/katex_labels.txt /kaggle/working/im2tex_data/im2latex-170k/formulas.txt /kaggle/working/im2tex_data/lukas_data/pdfmath/pdfmath.txt -s 8000 -o pix2tex/model/dataset/weai_tokenizer.json
+```
+
+* private_test which is contains 2.5k images from 5 datasets
+
+```
+python -m pix2tex.dataset.dataset -i /kaggle/working/im2tex_data/weai_data/weai_private_test /kaggle/working/im2tex_data/Euler_fonts/Euler_private_test /kaggle/working/im2tex_data/KaTeX_data/Katex_private_test /kaggle/working/im2tex_data/im2latex-170k/im170_private_test /kaggle/working/im2tex_data/lukas_data/pdfmath/pdfmath_private_test -e /kaggle/working/im2tex_data/weai_data/labels_weai.txt /kaggle/working/im2tex_data/Euler_fonts/euler_labels.txt /kaggle/working/im2tex_data/KaTeX_data/katex_labels.txt /kaggle/working/im2tex_data/im2latex-170k/formulas.txt /kaggle/working/im2tex_data/lukas_data/pdfmath/pdfmath.txt -o pix2tex/model/dataset/weai_private_test.pkl
+```
