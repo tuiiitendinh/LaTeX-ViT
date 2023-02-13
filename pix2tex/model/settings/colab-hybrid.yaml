@@ -2,7 +2,7 @@ backbone_layers:
 - 2
 - 3
 - 7
-batchsize: 64
+batchsize: 10
 betas:
 - 0.9
 - 0.999
@@ -21,12 +21,10 @@ dim: 256
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epochs: 50
+epochs: 
 gamma: 0.9995
 gpu_devices:
 - 0
-- 1
-heads: 8
 id: null
 load_chkpt: null
 lr_step: 30
@@ -42,7 +40,7 @@ min_dimensions:
 min_height: 32
 min_width: 32
 model_path: checkpoints_vit
-name: test_01-02
+name: ViT-SingleGPU
 no_cuda: false
 num_layers: 4
 num_tokens: 8000
@@ -71,7 +69,7 @@ eps: 0.00000001
 weight_decay: 0.01
 
 #OneCycleLR
-max_lr: 0.0001
+max_lr: 0.0005
 pct_start: 0.25
 anneal_strategy: cos
 div_factor: 12
