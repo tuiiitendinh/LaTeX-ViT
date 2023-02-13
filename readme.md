@@ -55,3 +55,9 @@ But before that, you need to change the `load_ckpt` entry in the config file to 
 ```
 python -m pix2tex.train-2 --config pix2tex/model/settings/config-hybrid.yaml --resume
 ```
+
+### Wandb API key
+At the beginning of the training process, you will asked to enter your wandb API key.
+If you already have a wandb account, you can get your API key from the link provided when run the command in step 3.
+
+Else, you can set the argument `wandb` to False in the config file to disable wandb logging.

@@ -2,7 +2,7 @@ backbone_layers:
 - 2
 - 3
 - 7
-batchsize: 64
+batchsize: 32
 betas:
 - 0.9
 - 0.999
@@ -42,12 +42,11 @@ min_dimensions:
 min_height: 32
 min_width: 32
 model_path: checkpoints_vit
-name: test_01-02
+name: test
 no_cuda: false
 num_layers: 4
 num_tokens: 8000
 optimizer: AdamW
-output_path: outputs
 pad: false
 pad_token: 0
 patch_size: 16
