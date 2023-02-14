@@ -1,15 +1,14 @@
-anneal_strategy: cos
 backbone_layers:
 - 2
 - 3
 - 7
-batchsize: 12
+batchsize: 10
 betas:
 - 0.9
 - 0.999
 bos_token: 1
 channels: 1
-config: /kaggle/working/LaTeX-ViT/pix2tex/model/settings/colab-hybrid.yaml
+config: /kaggle/working/LaTeX-ViT/checkpoints_vit/ViT-SingleGPU/config.yaml
 data: pix2tex/model/dataset/weai_train.pkl
 debug: false
 decoder_args:
@@ -18,29 +17,22 @@ decoder_args:
   ff_glu: true
   rel_pos_bias: false
   use_scalenorm: false
-device: cuda:0
+device: cuda
 dim: 256
-div_factor: 12
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epoch: 3
 epochs: 4
-eps: 1.0e-08
-final_div_factor: 100
 gamma: 0.9995
 gpu_devices:
 - 0
-heads: 8
 id: 3pg2tyhl
 load_chkpt: null
-lr: 0.001
 lr_step: 30
 max_dimensions:
 - 992
 - 496
 max_height: 496
-max_lr: 0.0005
 max_seq_len: 512
 max_width: 992
 min_dimensions:
@@ -58,11 +50,10 @@ output_path: outputs
 pad: false
 pad_token: 0
 patch_size: 16
-pct_start: 0.25
-resume: false
+resume: true
 sample_freq: 2000
 save_freq: 1
-scheduler: OneCycleLR
+scheduler: OneCycleLR 
 seed: 42
 temperature: 0.2
 test_samples: 20
@@ -72,4 +63,15 @@ tokenizer: pix2tex/model/dataset/weai_tokenizer.json
 valbatches: 100
 valdata: pix2tex/model/dataset/weai_valid.pkl
 wandb: true
+
+#AdamW
+lr: 0.0001
+eps: 0.00000001
 weight_decay: 0.01
+
+#OneCycleLR
+max_lr: 0.0005
+pct_start: 0.25
+anneal_strategy: cos
+div_factor: 12
+final_div_factor: 100
