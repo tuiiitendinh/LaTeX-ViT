@@ -25,6 +25,7 @@ epochs: 4
 gamma: 0.9995
 gpu_devices:
 - 0
+heads: 8
 id: null
 load_chkpt: null
 lr_step: 30
