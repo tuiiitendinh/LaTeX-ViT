@@ -33,7 +33,7 @@ gpu_devices:
 - 0
 heads: 8
 id: 1c9x635i
-load_chkpt: /kaggle/working/LaTeX-ViT/ViT-SingleGPU/ViT-SingleGPU_e03_step1977.pth
+load_chkpt: /kaggle/working/ViT-SingleGPU/ViT-SingleGPU_e03_step1977.pth
 lr: 0.0001
 lr_step: 30
 max_dimensions:
