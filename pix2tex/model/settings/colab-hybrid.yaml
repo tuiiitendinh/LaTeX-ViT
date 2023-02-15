@@ -30,11 +30,11 @@ id: null
 load_chkpt: null
 lr_step: 30
 max_dimensions:
-- 960
+- 896
 - 384
 max_height: 384
 max_seq_len: 512
-max_width: 960
+max_width: 896
 min_dimensions:
 - 32
 - 32
