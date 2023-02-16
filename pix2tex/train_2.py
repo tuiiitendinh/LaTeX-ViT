@@ -48,7 +48,17 @@ def train(args):
         if last_epoch:
             filename = os.path.join(out_path, 'final_model.pth')
 
-        torch.save(model.state_dict(), filename)
+        # old save function
+        # torch.save(model.state_dict(), filename)
+
+        torch.save( {
+                        'epoch': e,
+                        'step': step,
+                        'model': model.state_dict(),
+                        'optimizer': opt.state_dict(),
+                        'scheduler': scheduler.state_dict(),
+                        'map_location': device,
+                    }, filename)
         
         yaml.dump(dict(args), open(os.path.join(out_path, 'config.yaml'), 'w+'))
         print("Saved model at: ", filename)
@@ -95,23 +105,26 @@ def train(args):
                         wandb.log({'train/lr': scheduler.get_last_lr()[0]})
                     
                     #releases unoccupied memory at the end of each iteration
-                    torch.cuda.empty_cache()    
+                torch.cuda.empty_cache()    
 
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
                     #validation testing
                     test_counter += 1
+                    model.eval()
                     with torch.no_grad():
-                        model.eval()
                         bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=int(args.valbatches*e/args.epochs), name='val')
+                        # 
                         if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
                             val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
                             save_models(e, step=i, test = False, last_epoch = False)
                     model.train()
+                    
+                torch.cuda.empty_cache()    
 
                 #test model on testing set each 5 times after validation test
                 if test_counter == 4 :
+                    model.eval()
                     with torch.no_grad():
-                        model.eval()
                         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
                         if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
                             test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
