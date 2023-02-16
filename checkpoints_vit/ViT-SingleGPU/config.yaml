@@ -24,8 +24,8 @@ div_factor: 12
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epoch: 2
-epochs: 6
+epoch: 3
+epochs: 7
 eps: 1.0e-08
 final_div_factor: 100
 gamma: 0.9995
@@ -33,7 +33,7 @@ gpu_devices:
 - 0
 heads: 8
 id: 1c9x635i
-load_chkpt: /kaggle/working/ViT-SingleGPU/ViT-SingleGPU_e03_step1977.pth
+load_chkpt: /kaggle/working/ViT-SingleGPU/ViT-SingleGPU_e03_step21002.pth
 lr: 0.0001
 lr_step: 30
 max_dimensions:
@@ -65,11 +65,11 @@ save_freq: 1
 scheduler: OneCycleLR
 seed: 42
 temperature: 0.2
-test_samples: 20
-testbatchsize: 1000
+test_samples: 10
+testbatchsize: 500
 testdata: pix2tex/model/dataset/weai_test.pkl
 tokenizer: pix2tex/model/dataset/weai_tokenizer.json
-valbatches: 100
+valbatches: 85
 valdata: pix2tex/model/dataset/weai_valid.pkl
 wandb: true
 weight_decay: 0.01
