@@ -69,7 +69,7 @@ test_samples: 10
 testbatchsize: 500
 testdata: pix2tex/model/dataset/weai_test.pkl
 tokenizer: pix2tex/model/dataset/weai_tokenizer.json
-valbatches: 20
+valbatches: 100
 valdata: pix2tex/model/dataset/weai_valid.pkl
 wandb: true
 weight_decay: 0.01

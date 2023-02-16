@@ -88,6 +88,7 @@ def train(args):
             torch.cuda.reset_max_memory_allocated()
 
             for i, (seq, im) in enumerate(dset):    
+                torch.cuda.empty_cache()    
                 if seq is not None and im is not None:
                     opt.zero_grad()
                     total_loss = 0
@@ -112,8 +113,7 @@ def train(args):
                     test_counter += 1
                     model.eval()
                     with torch.no_grad():
-                        bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=int(args.valbatches*e/args.epochs), name='val')
-                        # 
+                        bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)/2), name='val')
                         if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
                             val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
                             save_models(e, step=i, test = False, last_epoch = False)
@@ -133,6 +133,7 @@ def train(args):
                             save_models(e, step=i, test = True, last_epoch = False)  
                         test_counter = 0
                     model.train()
+
             #save model after every epoch            
             if (e+1) % args.save_freq == 0:
                 save_models(e, step=len(dataloader), test = False, last_epoch = False)
