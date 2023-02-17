@@ -24,7 +24,7 @@ div_factor: 12
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epoch: 3
+epoch: 4
 epochs: 7
 eps: 1.0e-08
 final_div_factor: 100
@@ -33,7 +33,7 @@ gpu_devices:
 - 0
 heads: 8
 id: 1c9x635i
-load_chkpt: /kaggle/working/ViT-SingleGPU/ViT-SingleGPU_e04_step8993.pth
+load_chkpt: /kaggle/working/ViT-SingleGPU/ViT-SingleGPU_e04_step6993_test.pth
 lr: 0.0001
 lr_step: 30
 max_dimensions:
@@ -62,7 +62,7 @@ pct_start: 0.25
 resume: false
 sample_freq: 2000
 save_freq: 1
-scheduler: OneCycleLR
+scheduler: StepLR
 seed: 42
 temperature: 0.2
 test_samples: 10
