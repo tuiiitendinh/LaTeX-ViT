@@ -49,16 +49,16 @@ def train(args):
             filename = os.path.join(out_path, 'final_model.pth')
 
         # old save function
-        # torch.save(model.state_dict(), filename)
+        torch.save(model.state_dict(), filename)
 
-        torch.save( {
-                        'epoch': e,
-                        'step': step,
-                        'model': model.state_dict(),
-                        'optimizer': opt.state_dict(),
-                        'scheduler': scheduler.state_dict(),
-                        'map_location': device,
-                    }, filename)
+        # torch.save( {
+        #                 'epoch': e,
+        #                 'step': step,
+        #                 'model': model.state_dict(),
+        #                 'optimizer': opt.state_dict(),
+        #                 'scheduler': scheduler.state_dict(),
+        #                 'map_location': device,
+        #             }, filename)
         
         yaml.dump(dict(args), open(os.path.join(out_path, 'config.yaml'), 'w+'))
         print("Saved model at: ", filename)
