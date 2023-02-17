@@ -33,8 +33,8 @@ gpu_devices:
 - 0
 heads: 8
 id: 1c9x635i
-load_chkpt: /kaggle/working/ViT-SingleGPU/ViT-SingleGPU_e04_step6993_test.pth
-lr: 0.0001
+load_chkpt: /kaggle/working/ViT-SingleGPU/ViT-SingleGPU_e05_step7991_test.pth
+lr: 0.0005
 lr_step: 30
 max_dimensions:
 - 896
@@ -69,7 +69,7 @@ test_samples: 10
 testbatchsize: 500
 testdata: pix2tex/model/dataset/weai_test.pkl
 tokenizer: pix2tex/model/dataset/weai_tokenizer.json
-valbatches: 100
+valbatches: 90
 valdata: pix2tex/model/dataset/weai_valid.pkl
 wandb: true
 weight_decay: 0.01

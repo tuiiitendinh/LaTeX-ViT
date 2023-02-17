@@ -112,7 +112,7 @@ def train(args):
                     test_counter += 1
                     model.eval()
                     with torch.no_grad():
-                        bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)/2), name='val')
+                        bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)/3), name='val')
                         if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
                             val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
                             save_models(e, step=i, test = False, last_epoch = False)
