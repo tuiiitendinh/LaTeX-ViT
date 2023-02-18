@@ -25,7 +25,7 @@ encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
 epoch: 7
-epochs: 10
+epochs: 15
 eps: 1.0e-08
 final_div_factor: 100
 gamma: 0.9995
