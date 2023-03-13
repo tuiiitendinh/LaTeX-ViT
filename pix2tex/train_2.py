@@ -44,7 +44,7 @@ def train(args):
             filename = os.path.join(out_path, '%s_e%02d_step%02d_test.pth' % (args.name, e+1, step))
         else:
             filename = os.path.join(out_path, '%s_e%02d_step%02d.pth' % (args.name, e+1, step))
-        
+            
         if last_epoch:
             filename = os.path.join(out_path, 'final_model.pth')
 
@@ -59,15 +59,15 @@ def train(args):
         #                 'scheduler': scheduler.state_dict(),
         #                 'map_location': device,
         #             }, filename)
-        
+
         yaml.dump(dict(args), open(os.path.join(out_path, 'config.yaml'), 'w+'))
         print("Saved model at: ", filename)
-        
+
     if args.optimizer == 'Adam':
         opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas)
     elif args.optimizer == 'AdamW':
         opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas, eps=args.eps, weight_decay=args.weight_decay)
-    
+
     if args.scheduler == 'StepLR':
         scheduler = get_scheduler(args.scheduler)(opt, step_size=args.lr_step, gamma=args.gamma)
     elif args.scheduler == 'OneCycleLR':
@@ -86,8 +86,8 @@ def train(args):
 
             #resets the memory allocation tracker at the beginning of each epoch
             torch.cuda.reset_peak_memory_stats()
-            for i, (seq, im) in enumerate(dset):    
-                torch.cuda.empty_cache()    
+            for i, (seq, im) in enumerate(dset):
+                torch.cuda.empty_cache()
                 if seq is not None and im is not None:
                     opt.zero_grad()
                     total_loss = 0
@@ -103,13 +103,12 @@ def train(args):
                     if args.wandb:
                         wandb.log({'train/loss': total_loss})
                         wandb.log({'train/lr': scheduler.get_last_lr()[0]})
-                    
+
                     #releases unoccupied memory at the end of each iteration
-                torch.cuda.empty_cache()    
+                torch.cuda.empty_cache()
 
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
                     #validation testing
-                    test_counter += 1
                     model.eval()
                     with torch.no_grad():
                         bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)/3), name='val')
@@ -117,27 +116,43 @@ def train(args):
                             val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
                             save_models(e, step=i, test = False, last_epoch = False)
                     model.train()
-                    
-                torch.cuda.empty_cache()    
+
+                torch.cuda.empty_cache()
 
                 #test model on testing set each 5 times after validation test
-                if test_counter == 4 :
-                    model.eval()
-                    with torch.no_grad():
-                        bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
-                        if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
-                            test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
-                            # if args.wandb:
-                            #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
-                            save_models(e, step=i, test = True, last_epoch = False)  
-                        test_counter = 0
-                    model.train()
+                # if test_counter == 4 :
+                #     model.eval()
+                #     with torch.no_grad():
+                #         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+                #         if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+                #             test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+                #             # if args.wandb:
+                #             #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
+                #             save_models(e, step=i, test = True, last_epoch = False)
+                #         test_counter = 0
+                #     model.train()
 
-            #save model after every epoch            
+            
+            #test model after every epoch
+            test_counter += 1
+            if test_counter == 4:
+                model.eval()
+                with torch.no_grad():
+                    bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+                    if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+                        test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+                        # if args.wandb:
+                        #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
+                        save_models(e, step=i, test = True, last_epoch = False)
+                    test_counter = 0
+                model.train()
+                
+            #save model after every epoch
             if (e+1) % args.save_freq == 0:
                 save_models(e, step=len(dataloader), test = False, last_epoch = False)
             if args.wandb:
                 wandb.log({'train/epoch': e+1})
+
     except KeyboardInterrupt:
         if e >= 2:
             save_models(e, step=i, last_epoch = False)
