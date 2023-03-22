@@ -18,7 +18,7 @@ decoder_args:
   ff_glu: true
   rel_pos_bias: false
   use_scalenorm: false
-device: cuda:0
+device: cuda
 dim: 256
 div_factor: 12
 encoder_depth: 4
@@ -31,6 +31,7 @@ final_div_factor: 100
 gamma: 0.9995
 gpu_devices:
 - 0
+- 1
 heads: 8
 id: 1twn1qku
 load_chkpt: /kaggle/working/PureViT/PureViT_e03_step3995.pth
