@@ -9,6 +9,7 @@ betas:
 - 0.999
 bos_token: 1
 channels: 1
+config: /kaggle/working/LaTeX-ViT/checkpoints_vit/PureViT/config.yaml
 data: pix2tex/model/dataset/weai_train.pkl
 debug: false
 decoder_args:
@@ -23,6 +24,7 @@ div_factor: 12
 encoder_depth: 4
 encoder_structure: vit
 eos_token: 2
+epoch: 2
 epochs: 6
 eps: 1.0e-08
 final_div_factor: 100
@@ -30,8 +32,8 @@ gamma: 0.9995
 gpu_devices:
 - 0
 heads: 8
-id: null
-load_chkpt: null
+id: 1twn1qku
+load_chkpt: /kaggle/working/PureViT/PureViT_e03_step3995.pth
 lr: 0.0005
 lr_step: 30
 max_dimensions:
