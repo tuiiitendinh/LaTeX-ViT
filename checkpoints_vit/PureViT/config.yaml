@@ -3,7 +3,7 @@ backbone_layers:
 - 2
 - 3
 - 7
-batchsize: 8
+batchsize: 10
 betas:
 - 0.9
 - 0.999
@@ -34,7 +34,7 @@ gpu_devices:
 - 1
 heads: 8
 id: 1twn1qku
-load_chkpt: /kaggle/working/PureViT/PureViT_e03_step3995.pth
+load_chkpt: /kaggle/working/PureViT/PureViT_e03_step7995.pth
 lr: 0.0005
 lr_step: 30
 max_dimensions:
