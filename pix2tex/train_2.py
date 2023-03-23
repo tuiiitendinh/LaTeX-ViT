@@ -109,6 +109,7 @@ def train(args):
 
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
                     #validation testing
+                    test_counter += 1
                     model.eval()
                     with torch.no_grad():
                         bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)/4), name='val')
@@ -120,32 +121,32 @@ def train(args):
                 torch.cuda.empty_cache()
 
                 #test model on testing set each 5 times after validation test
-                # if test_counter == 4 :
-                #     model.eval()
-                #     with torch.no_grad():
-                #         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
-                #         if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
-                #             test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
-                #             # if args.wandb:
-                #             #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
-                #             save_models(e, step=i, test = True, last_epoch = False)
-                #         test_counter = 0
-                #     model.train()
+                if test_counter == 4 :
+                    model.eval()
+                    with torch.no_grad():
+                        bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+                        if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+                            test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+                            # if args.wandb:
+                            #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
+                            save_models(e, step=i, test = True, last_epoch = False)
+                        test_counter = 0
+                    model.train()
 
             
             #test model after every epoch
-            test_counter += 1
-            if test_counter == 4:
-                model.eval()
-                with torch.no_grad():
-                    bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
-                    if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
-                        test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
-                        # if args.wandb:
-                        #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
-                        save_models(e, step=i, test = True, last_epoch = False)
-                    test_counter = 0
-                model.train()
+            # test_counter += 1
+            # if test_counter == 4:
+            #     model.eval()
+            #     with torch.no_grad():
+            #         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+            #         if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+            #             test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+            #             # if args.wandb:
+            #             #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
+            #             save_models(e, step=i, test = True, last_epoch = False)
+            #         test_counter = 0
+            #     model.train()
 
             #save model after every epoch
             if (e+1) % args.save_freq == 0:
