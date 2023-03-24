@@ -18,14 +18,14 @@ decoder_args:
   ff_glu: true
   rel_pos_bias: false
   use_scalenorm: false
-device: cuda
+device: cuda:0
 dim: 256
 div_factor: 12
 encoder_depth: 4
 encoder_structure: vit
 eos_token: 2
-epoch: 2
-epochs: 6
+epoch: 6
+epochs: 15
 eps: 1.0e-08
 final_div_factor: 100
 gamma: 0.9995
@@ -34,7 +34,7 @@ gpu_devices:
 - 1
 heads: 8
 id: 1twn1qku
-load_chkpt: /kaggle/working/PureViT/PureViT_e03_step7995.pth
+load_chkpt: /kaggle/working/PureViT/PureViT_e06_step19011.pth
 lr: 0.0005
 lr_step: 30
 max_dimensions:
@@ -60,7 +60,7 @@ pad: false
 pad_token: 0
 patch_size: 16
 pct_start: 0.25
-resume: false
+resume: true
 sample_freq: 2000
 save_freq: 1
 scheduler: OneCycleLR
