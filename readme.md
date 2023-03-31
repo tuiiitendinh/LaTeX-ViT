@@ -5,7 +5,6 @@
 * We have to clone 2 repos
 
 ```
-git clone https://github.com/tuiiitendinh/im2tex_data
 git clone https://github.com/tuiiitendinh/LaTeX-ViT.git
 ```
 The first one is the data repo, the second one is the model repo. We will use the data repo to generate the dataset pickle file and the model repo to train the model.
