@@ -106,22 +106,20 @@ def train(args):
 
                     #releases unoccupied memory at the end of each iteration
                 torch.cuda.empty_cache()
-
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
-                    #validation testing
+                    #validation testing 
                     test_counter += 1
                     model.eval()
                     with torch.no_grad():
-                        bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)/4), name='val')
+                        bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)/8), name='val')
                         if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
                             val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
                             save_models(e, step=i, test = False, last_epoch = False)
                     model.train()
 
                 torch.cuda.empty_cache()
-
-                #test model on testing set each 5 times after validation test
-                if test_counter == 4 :
+                #test model on testing set each 3 times after validation test
+                if test_counter == 2 :
                     model.eval()
                     with torch.no_grad():
                         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
