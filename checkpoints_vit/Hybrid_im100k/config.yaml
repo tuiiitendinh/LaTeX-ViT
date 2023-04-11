@@ -3,14 +3,13 @@ backbone_layers:
 - 2
 - 3
 - 7
-batchsize: 10
+batchsize: 8
 betas:
 - 0.9
 - 0.999
 bos_token: 1
 channels: 1
-config: /kaggle/working/LaTeX-ViT/checkpoints_vit/PureViT/config.yaml
-data: pix2tex/model/dataset/weai_train.pkl
+data: pix2tex/model/dataset/weai_train_100k.pkl
 debug: false
 decoder_args:
   attn_on_attn: true
@@ -22,19 +21,17 @@ device: cuda:0
 dim: 256
 div_factor: 12
 encoder_depth: 4
-encoder_structure: vit
+encoder_structure: hybrid
 eos_token: 2
-epoch: 6
 epochs: 15
 eps: 1.0e-08
 final_div_factor: 100
 gamma: 0.9995
 gpu_devices:
 - 0
-- 1
 heads: 8
-id: 1twn1qku
-load_chkpt: /kaggle/working/PureViT/PureViT_e06_step19011.pth
+id: null
+load_chkpt: null
 lr: 0.0005
 lr_step: 30
 max_dimensions:
@@ -50,7 +47,7 @@ min_dimensions:
 min_height: 32
 min_width: 32
 model_path: checkpoints_vit
-name: PureViT
+name: Hybrid-im100k
 no_cuda: false
 num_layers: 4
 num_tokens: 8000
@@ -60,17 +57,17 @@ pad: false
 pad_token: 0
 patch_size: 16
 pct_start: 0.25
-resume: true
+resume: false
 sample_freq: 2000
 save_freq: 1
-scheduler: OneCycleLR
+scheduler: StepLR
 seed: 42
 temperature: 0.2
 test_samples: 10
 testbatchsize: 500
-testdata: pix2tex/model/dataset/weai_test.pkl
-tokenizer: pix2tex/model/dataset/weai_tokenizer.json
+testdata: pix2tex/model/dataset/weai_test_100k.pkl
+tokenizer: pix2tex/model/dataset/weai_tokenizer_100k.json
 valbatches: 90
-valdata: pix2tex/model/dataset/weai_valid.pkl
+valdata: pix2tex/model/dataset/weai_valid_100k.pkl
 wandb: true
 weight_decay: 0.01
