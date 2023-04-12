@@ -23,6 +23,7 @@ div_factor: 12
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
+epoch: 1
 epochs: 15
 eps: 1.0e-08
 final_div_factor: 100
@@ -31,7 +32,7 @@ gpu_devices:
 - 0
 heads: 8
 id: null
-load_chkpt: null
+load_chkpt: /kaggle/working/ViT-SingleGPU/ViT-SingleGPU_e11_step9979_test.pth
 lr: 0.0005
 lr_step: 30
 max_dimensions:
@@ -66,7 +67,7 @@ temperature: 0.2
 test_samples: 10
 testbatchsize: 500
 testdata: pix2tex/model/dataset/weai_test_100k.pkl
-tokenizer: pix2tex/model/dataset/weai_tokenizer_100k.json
+tokenizer: pix2tex/model/dataset/weai_tokenizer_finetune.json
 valbatches: 90
 valdata: pix2tex/model/dataset/weai_valid_100k.pkl
 wandb: true
