@@ -85,7 +85,8 @@ def train(args):
             dset = tqdm(iter(dataloader))
 
             #resets the memory allocation tracker at the beginning of each epoch
-            torch.cuda.reset_peak_memory_stats()
+            torch.cuda.reset_max_memory_allocated(device=device)
+            
             for i, (seq, im) in enumerate(dset):
                 torch.cuda.empty_cache()
                 if seq is not None and im is not None:
