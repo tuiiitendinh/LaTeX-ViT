@@ -3,7 +3,7 @@ backbone_layers:
 - 2
 - 3
 - 7
-batchsize: 8
+batchsize: 16
 betas:
 - 0.9
 - 0.999
@@ -23,7 +23,7 @@ div_factor: 12
 encoder_depth: 4
 encoder_structure: hybrid
 eos_token: 2
-epochs: 15
+epochs: 20
 eps: 1.0e-08
 final_div_factor: 100
 gamma: 0.9995
@@ -62,7 +62,7 @@ sample_freq: 2000
 save_freq: 1
 scheduler: StepLR
 seed: 42
-temperature: 0.2
+temperature: 0.25
 test_samples: 10
 testbatchsize: 100
 testdata: pix2tex/model/dataset/weai_test_only_100k.pkl
