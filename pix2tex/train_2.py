@@ -25,7 +25,7 @@ def train(args):
 
     # add testdata in config file
     testloader = Im2LatexDataset().load(args.testdata)
-    testloader.update(**args, test=False)
+    testloader.update(**args, test=True)
 
     device = args.device
     model = get_model(args)
