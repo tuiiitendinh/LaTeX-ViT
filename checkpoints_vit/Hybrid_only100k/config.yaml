@@ -64,7 +64,7 @@ scheduler: StepLR
 seed: 42
 temperature: 0.2
 test_samples: 10
-testbatchsize: 500
+testbatchsize: 100
 testdata: pix2tex/model/dataset/weai_test_only_100k.pkl
 tokenizer: pix2tex/model/dataset/weai_tokenizer_only_100k.json
 valbatches: 90
