@@ -92,30 +92,30 @@ class CustomVisionTransformer(VisionTransformer):
 
     def forward_features(self, x):
         B, c, h, w = x.shape
-        print("\ninput shape: ", x.shape)
+        # print("\ninput shape: ", x.shape)
         
         x = self.patch_embed(x).permute(0, 2, 3, 1) #expected embed_dim = 256
-        print("\npatch embeded shape: ", x.shape)
+        # print("\npatch embeded shape: ", x.shape)
         # x.shape now is torch.Size([1, 24, 2, 256]) as [Batch_size, height, width, embed_dim]
 
         #we have to expand the shape of cls_token to [Batch, cls_token, width, embed_dim], for example: [1, 1, 2, 256]
         cls_tokens = self.cls_token.expand(B, 1, x.shape[2] , -1)  # stole cls_tokens impl from Phil Wang, thanks
-        print("\ncls_tokens shape: ", cls_tokens.shape)
+        # print("\ncls_tokens shape: ", cls_tokens.shape)
         
         #concatenate cls_tokens and x
         x = torch.cat((cls_tokens, x), dim = 1)
-        print("\nshape after patch_embed + cls_token: ", x.shape) # torch.Size([1, 25, 2, 256])
+        # print("\nshape after patch_embed + cls_token: ", x.shape) # torch.Size([1, 25, 2, 256])
 
         # Add position encoding
         x += self.pos_encoding(x)
-        print("\nshape after pos embedding: ", x.shape) # torch.Size([1, 25, 2, 256])
+        # print("\nshape after pos embedding: ", x.shape) # torch.Size([1, 25, 2, 256])
 
         x = self.pos_drop(x)
-        print("\nshape after pos drop: ", x.shape) # torch.Size([1, 25, 2, 256])
+        # print("\nshape after pos drop: ", x.shape) # torch.Size([1, 25, 2, 256])
 
         # Flatten height and width dimensions to [batch, height*width, embed_dim]
         x = x.reshape(B, -1, x.shape[-1])
-        print("\nshape after flattening height * width: ", x.shape)  # torch.Size([1, 50, 256])
+        # print("\nshape after flattening height * width: ", x.shape)  # torch.Size([1, 50, 256])
 
         for blk in self.blocks:
             x = blk(x)
