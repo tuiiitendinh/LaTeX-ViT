@@ -80,51 +80,76 @@ def train(args):
     test_counter = 0
 
     try:
+        # Begin training loop over specified number of epochs
         for e in range(args.epoch, args.epochs):
             args.epoch = e
             dset = tqdm(iter(dataloader))
 
-            #resets the memory allocation tracker at the beginning of each epoch
+            # # Reset the CUDA memory allocation tracker at the beginning of each epoch
             torch.cuda.reset_max_memory_allocated(device=device)
             
+            # Iterate over each batch in the dataloader
             for i, (seq, im) in enumerate(dset):
+                # Empty cache after each iteration to free up memory
                 torch.cuda.empty_cache()
+
+                # Check if sequence and image are not None
                 if seq is not None and im is not None:
+                    # Reset optimizer gradients
                     opt.zero_grad()
                     total_loss = 0
+
+                    # Process a portion of the batch at a time (a "microbatch") for memory efficiency
                     for j in range(0, len(im), microbatch):
+                        # Move batch items to GPU
                         tgt_seq, tgt_mask = seq['input_ids'][j:j+microbatch].to(device), seq['attention_mask'][j:j+microbatch].bool().to(device)
+                        # Forward pass: compute predicted outputs and loss by applying the model to the batch
                         loss = model.data_parallel(im[j:j+microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask)*microbatch/args.batchsize
-                        loss.backward()  # data parallism loss is a vector
+
+                        # Backward pass: compute gradient of the loss with respect to model parameters
+                        loss.backward()  
                         total_loss += loss.item()
+
+                        # Clip the gradients to prevent them from getting too large and causing numerical instability
                         torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
+
+                    # Optimization step: update the model's parameters
                     opt.step()
+
+                    # Step the learning rate scheduler
                     scheduler.step()
+
+                    # Display the loss
                     dset.set_description('Loss: %.4f' % total_loss)
+
+                    # Log the loss and learning rate if wandb logging is enabled
                     if args.wandb:
                         wandb.log({'train/loss': total_loss})
                         wandb.log({'train/lr': scheduler.get_last_lr()[0]})
 
-                    #releases unoccupied memory at the end of each iteration
+                Release unoccupied memory
                 torch.cuda.empty_cache()
+
+                # Validate the model after each 'sample_freq' steps
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
-                    #validation testing 
-                    test_counter += 1
+                    # Switch to evaluation mode
+                    model.eval()
+                    # Validate model
                     with torch.no_grad():
-                        torch.cuda.empty_cache()
-                        model.eval()
                         bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)), name='val')
+
+                        # If current validation scores are the best so far, save the model
                         if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
                             val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
                             save_models(e, step=i, test = False, last_epoch = False)
+                    # Switch back to training mode
                     model.train()
 
-                torch.cuda.empty_cache()
-                #test model on testing set each 3 times after validation test
+                # Test the model on the test set periodically after a certain number of validation tests
+                #torch.cuda.empty_cache()
                 if test_counter == 4 :
+                    model.eval()
                     with torch.no_grad():
-                        torch.cuda.empty_cache()
-                        model.eval()
                         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
                         if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
                             test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
@@ -135,19 +160,23 @@ def train(args):
                     model.train()
 
             
-            #test model after every epoch
-            # test_counter += 1
-            # if test_counter == 4:
-            #     model.eval()
-            #     with torch.no_grad():
-            #         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
-            #         if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
-            #             test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
-            #             # if args.wandb:
-            #             #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
-            #             save_models(e, step=i, test = True, last_epoch = False)
-            #         test_counter = 0
-            #     model.train()
+            # #test model after every epoch
+            # # test_counter += 1
+            # # if test_counter == 4:
+            # #     model.eval()
+            # #     with torch.no_grad():
+            # #         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+            # #         if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+            # #             test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+            # #             # if args.wandb:
+            # #             #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
+            # #             save_models(e, step=i, test = True, last_epoch = False)
+            # #         test_counter = 0
+            # #     model.train()
+
+            # # Save the model at the end of each 'save_freq' epochs
+            # if (e+1) % args.save_freq == 0:
+            #     save_models(e, step=len(dataloader), test = False, last_epoch = False)
 
             #save model after every epoch
             if (e+1) % args.save_freq == 0:

@@ -9,7 +9,7 @@ betas:
 batchsize: 64
 bos_token: 1
 channels: 1
-data: dataset/data/train.pkl
+data: pix2tex/model/dataset/TEST/train.pkl
 debug: false
 decoder_args:
   attn_on_attn: true
@@ -50,6 +50,9 @@ encoder_structure: hybrid
 temperature: 0.2
 test_samples: 5
 testbatchsize: 20
-tokenizer: dataset/tokenizer.json
+tokenizer: pix2tex/model/dataset/TEST/tokenizer.json
 valbatches: 100
-valdata: dataset/data/val.pkl
+wandb: false
+device: cuda
+valdata: pix2tex/model/dataset/TEST/train.pkl
+

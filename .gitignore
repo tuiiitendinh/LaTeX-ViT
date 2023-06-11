@@ -132,9 +132,11 @@ notebooks/**
 !notebooks/LaTeX_OCR*.ipynb
 .ipynb_checkpoints/
 **/dataset/data/**
+data/*
 wandb/
 pix2tex/model/checkpoints/**
 !pix2tex/model/checkpoints/*.py
+pix2tex/model/dataset/*
 !**/.gitkeep
 .vscode
 .DS_Store
