@@ -28,7 +28,7 @@ def train(args):
     testloader.update(**args, test=True)
 
     device = args.device
-    model = get_model(args)
+    model = get_model(dataloader, args)
     if torch.cuda.is_available() and not args.no_cuda:
         gpu_memory_check(model, args)
     val_max_bleu, val_max_token_acc = 0, 0
@@ -105,7 +105,8 @@ def train(args):
                         tgt_seq, tgt_mask = seq['input_ids'][j:j+microbatch].to(device), seq['attention_mask'][j:j+microbatch].bool().to(device)
                         # Forward pass: compute predicted outputs and loss by applying the model to the batch
                         loss = model.data_parallel(im[j:j+microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask)*microbatch/args.batchsize
-
+                        #print value of loss
+                        print(loss)
                         # Backward pass: compute gradient of the loss with respect to model parameters
                         loss.backward()  
                         total_loss += loss.item()
@@ -127,7 +128,7 @@ def train(args):
                         wandb.log({'train/loss': total_loss})
                         wandb.log({'train/lr': scheduler.get_last_lr()[0]})
 
-                Release unoccupied memory
+                # Release unoccupied memory
                 torch.cuda.empty_cache()
 
                 # Validate the model after each 'sample_freq' steps

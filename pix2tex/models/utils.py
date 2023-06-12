@@ -10,7 +10,7 @@ def detokenize(tokens, tokenizer):
     if isinstance(tokens, torch.Tensor):
         tokens = tokens.tolist()
     toks = [tokenizer.convert_ids_to_tokens(tok) for tok in tokens]
-    print("detokenize run")
+    # print("Running detokenize...")
     for b in range(len(toks)):
         for i in reversed(range(len(toks[b]))):
             if toks[b][i] is None:
@@ -70,6 +70,8 @@ class Model(nn.Module):
         for i in range(len(pred)):
             avarage_bleu += bleu_score([pred[i]], [[tgt[i]]])
         bleu = avarage_bleu/len(pred)
+        print("Reward Score: ", bleu)
+
         # Return the output
         return out*(1-bleu)
 
