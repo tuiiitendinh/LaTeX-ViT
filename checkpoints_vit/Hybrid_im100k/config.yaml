@@ -9,7 +9,7 @@ betas:
 - 0.999
 bos_token: 1
 channels: 1
-data: pix2tex/model/dataset/weai_train_100k.pkl
+data: pix2tex/model/dataset/train.pkl
 debug: false
 decoder_args:
   attn_on_attn: true
@@ -32,7 +32,7 @@ gpu_devices:
 - 0
 heads: 8
 id: null
-load_chkpt: /kaggle/working/ViT-SingleGPU/ViT-SingleGPU_e11_step9979_test.pth
+load_chkpt: null
 lr: 0.0005
 lr_step: 30
 max_dimensions:
@@ -66,9 +66,9 @@ seed: 42
 temperature: 0.2
 test_samples: 10
 testbatchsize: 500
-testdata: pix2tex/model/dataset/weai_test_100k.pkl
-tokenizer: pix2tex/model/dataset/weai_tokenizer_finetune.json
+testdata: pix2tex/model/dataset/test.pkl
+tokenizer: pix2tex\model\dataset\tokenizer.json
 valbatches: 90
-valdata: pix2tex/model/dataset/weai_valid_100k.pkl
-wandb: true
+valdata: pix2tex/model/dataset/valid.pkl
+wandb: false
 weight_decay: 0.01

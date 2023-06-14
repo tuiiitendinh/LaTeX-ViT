@@ -12,8 +12,7 @@ import torch.nn as nn
 from pix2tex.eval import evaluate
 from pix2tex.models import get_model
 # from pix2tex.utils import *
-from pix2tex.utils import in_model_path, parse_args, seed_everything, get_optimizer, get_scheduler, gpu_memory_check
-
+from pix2tex.utils import in_model_path, parse_args, seed_everything, get_optimizer, get_scheduler, gpu_memory_check, SequenceLoss
 
 def train(args):
     dataloader = Im2LatexDataset().load(args.data)
@@ -79,6 +78,8 @@ def train(args):
 
     test_counter = 0
 
+    seq_loss = SequenceLoss(dataloader.tokenizer)
+
     try:
         # Begin training loop over specified number of epochs
         for e in range(args.epoch, args.epochs):
@@ -107,6 +108,11 @@ def train(args):
                         loss = model.data_parallel(im[j:j+microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask)*microbatch/args.batchsize
                         #print value of loss
                         print(loss)
+
+                        #import sequence loss
+                        y, y_hat = tgt_seq, model.generate(im.to(device), temperature=args.get('temperature', .2))
+                        seq_loss(y, y_hat)
+
                         # Backward pass: compute gradient of the loss with respect to model parameters
                         loss.backward()  
                         total_loss += loss.item()
