@@ -12,7 +12,8 @@ import torch.nn as nn
 from pix2tex.eval import evaluate
 from pix2tex.models import get_model
 # from pix2tex.utils import *
-from pix2tex.utils import in_model_path, parse_args, seed_everything, get_optimizer, get_scheduler, gpu_memory_check, SequenceLoss
+from pix2tex.utils import in_model_path, parse_args, seed_everything, get_optimizer, get_scheduler, gpu_memory_check
+from pix2tex.utils.loss import SequenceLoss
 
 def train(args):
     dataloader = Im2LatexDataset().load(args.data)
@@ -112,90 +113,97 @@ def train(args):
                         #import sequence loss
                         y, y_hat = tgt_seq, model.generate(im.to(device), temperature=args.get('temperature', .2))
                         seq_loss(y, y_hat)
+                        
+                        #tính logits y_hat của xi với xi là ảnh input
+                        #tính p_theta(xi|y) với y là chuỗi input
+                        #tính loss (p_theta(y_hat^i|x^i))
+                        #tính reward, store reward variable để tính loss cho policy gradient
+                        
 
-                        # Backward pass: compute gradient of the loss with respect to model parameters
-                        loss.backward()  
-                        total_loss += loss.item()
+    #                     # Backward pass: compute gradient of the loss with respect to model parameters
+    #                     loss.backward()  
+    #                     total_loss += loss.item()
 
-                        # Clip the gradients to prevent them from getting too large and causing numerical instability
-                        torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
+    #                     # Clip the gradients to prevent them from getting too large and causing numerical instability
+    #                     torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
 
-                    # Optimization step: update the model's parameters
-                    opt.step()
+    #                 # Optimization step: update the model's parameters
+    #                 opt.step()
 
-                    # Step the learning rate scheduler
-                    scheduler.step()
+    #                 # Step the learning rate scheduler
+    #                 scheduler.step()
 
-                    # Display the loss
-                    dset.set_description('Loss: %.4f' % total_loss)
+    #                 # Display the loss
+    #                 dset.set_description('Loss: %.4f' % total_loss)
 
-                    # Log the loss and learning rate if wandb logging is enabled
-                    if args.wandb:
-                        wandb.log({'train/loss': total_loss})
-                        wandb.log({'train/lr': scheduler.get_last_lr()[0]})
+    #                 # Log the loss and learning rate if wandb logging is enabled
+    #                 if args.wandb:
+    #                     wandb.log({'train/loss': total_loss})
+    #                     wandb.log({'train/lr': scheduler.get_last_lr()[0]})
 
-                # Release unoccupied memory
-                torch.cuda.empty_cache()
+    #             # Release unoccupied memory
+    #             torch.cuda.empty_cache()
 
-                # Validate the model after each 'sample_freq' steps
-                if (i+1+len(dataloader)*e) % args.sample_freq == 0:
-                    # Switch to evaluation mode
-                    model.eval()
-                    # Validate model
-                    with torch.no_grad():
-                        bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)), name='val')
+    #             # Validate the model after each 'sample_freq' steps
+    #             if (i+1+len(dataloader)*e) % args.sample_freq == 0:
+    #                 # Switch to evaluation mode
+    #                 model.eval()
+    #                 # Validate model
+    #                 with torch.no_grad():
+    #                     bleu_score_val, edit_distance_val, token_accuracy_val = evaluate(model, valdataloader, args, num_batches=round(int(args.valbatches*e/args.epochs)), name='val')
 
-                        # If current validation scores are the best so far, save the model
-                        if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
-                            val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
-                            save_models(e, step=i, test = False, last_epoch = False)
-                    # Switch back to training mode
-                    model.train()
+    #                     # If current validation scores are the best so far, save the model
+    #                     if bleu_score_val > val_max_bleu and token_accuracy_val > val_max_token_acc:
+    #                         val_max_bleu, val_max_token_acc = bleu_score_val, token_accuracy_val
+    #                         save_models(e, step=i, test = False, last_epoch = False)
+    #                 # Switch back to training mode
+    #                 model.train()
 
-                # Test the model on the test set periodically after a certain number of validation tests
-                #torch.cuda.empty_cache()
-                if test_counter == 4 :
-                    model.eval()
-                    with torch.no_grad():
-                        bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
-                        if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
-                            test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
-                            # if args.wandb:
-                            #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
-                            save_models(e, step=i, test = True, last_epoch = False)
-                        test_counter = 0
-                    model.train()
+    #             # Test the model on the test set periodically after a certain number of validation tests
+    #             #torch.cuda.empty_cache()
+    #             if test_counter == 4 :
+    #                 model.eval()
+    #                 with torch.no_grad():
+    #                     bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+    #                     if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+    #                         test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+    #                         # if args.wandb:
+    #                         #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
+    #                         save_models(e, step=i, test = True, last_epoch = False)
+    #                     test_counter = 0
+    #                 model.train()
 
             
-            # #test model after every epoch
-            # # test_counter += 1
-            # # if test_counter == 4:
-            # #     model.eval()
-            # #     with torch.no_grad():
-            # #         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
-            # #         if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
-            # #             test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
-            # #             # if args.wandb:
-            # #             #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
-            # #             save_models(e, step=i, test = True, last_epoch = False)
-            # #         test_counter = 0
-            # #     model.train()
+    #         # #test model after every epoch
+    #         # # test_counter += 1
+    #         # # if test_counter == 4:
+    #         # #     model.eval()
+    #         # #     with torch.no_grad():
+    #         # #         bleu_score_test, edit_distance_test, token_accuracy_test = evaluate(model, testloader, args, num_batches=args.testbatchsize, name='test')
+    #         # #         if bleu_score_test > test_max_bleu and token_accuracy_test > test_max_token_acc:
+    #         # #             test_max_bleu, test_max_token_acc = bleu_score_test, token_accuracy_test
+    #         # #             # if args.wandb:
+    #         # #             #     wandb.log({'test_periodically/bleu': bleu_score_test, 'test_periodically/edit_distance': edit_distance_test, 'test_periodically/token_accuracy': token_accuracy_test})
+    #         # #             save_models(e, step=i, test = True, last_epoch = False)
+    #         # #         test_counter = 0
+    #         # #     model.train()
 
-            # # Save the model at the end of each 'save_freq' epochs
-            # if (e+1) % args.save_freq == 0:
-            #     save_models(e, step=len(dataloader), test = False, last_epoch = False)
+    #         # # Save the model at the end of each 'save_freq' epochs
+    #         # if (e+1) % args.save_freq == 0:
+    #         #     save_models(e, step=len(dataloader), test = False, last_epoch = False)
 
-            #save model after every epoch
-            if (e+1) % args.save_freq == 0:
-                save_models(e, step=len(dataloader), test = False, last_epoch = False)
-            if args.wandb:
-                wandb.log({'train/epoch': e+1})
+    #         #save model after every epoch
+    #         if (e+1) % args.save_freq == 0:
+    #             save_models(e, step=len(dataloader), test = False, last_epoch = False)
+    #         if args.wandb:
+    #             wandb.log({'train/epoch': e+1})
 
     except KeyboardInterrupt:
-        if e >= 2:
-            save_models(e, step=i, last_epoch = False)
-        raise KeyboardInterrupt
-    save_models(e, step=len(dataloader), test = False, last_epoch = True)
+        pass
+    #     if e >= 2:
+    #         save_models(e, step=i, last_epoch = False)
+    #     raise KeyboardInterrupt
+    # save_models(e, step=len(dataloader), test = False, last_epoch = True)
 
 
 if __name__ == '__main__':
