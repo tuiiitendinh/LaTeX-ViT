@@ -11,7 +11,8 @@ class SequenceLoss(nn.Module):
         self.tokenizer = tokenizer
     
     #define the forward pass, which takes the y and y_hat tensors as arguments
-    def forward(self, y, y_hat):
+    def forward(self, y, y_hat, loss):
+        # print("utils/loss ... loss from parallel: ", loss)
         y = detokenize(y, self.tokenizer)
         # print("utils/loss ... tgt_seq: ", y)            
         y_hat = detokenize(y_hat, self.tokenizer)
@@ -19,5 +20,6 @@ class SequenceLoss(nn.Module):
         
         #calculate the reward score
         reward = metrics.bleu_score(y_hat, [alternatives(x) for x in y])
-        print("Reward BLEU: ", reward)
-        return reward
+        # print("Reward BLEU: ", reward)
+        
+        return loss * reward
