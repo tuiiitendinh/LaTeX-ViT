@@ -108,24 +108,24 @@ def train(args):
                         # Forward pass: compute predicted outputs and loss by applying the model to the batch
                         loss = model.data_parallel(im[j:j+microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask)*microbatch/args.batchsize
                         #print value of loss
-                        print(loss)
+                        # print("\n Loss in parallel: ", loss)
 
                         #import sequence loss
                         y, y_hat = tgt_seq, model.generate(im.to(device), temperature=args.get('temperature', .2))
-                        seq_loss(y, y_hat)
-                        
+                        loss = loss * seq_loss(y, y_hat)
+                        # print("\n Loss after get reward: ", loss)
                         #tính logits y_hat của xi với xi là ảnh input
                         #tính p_theta(xi|y) với y là chuỗi input
                         #tính loss (p_theta(y_hat^i|x^i))
                         #tính reward, store reward variable để tính loss cho policy gradient
                         
-
     #                     # Backward pass: compute gradient of the loss with respect to model parameters
-    #                     loss.backward()  
-    #                     total_loss += loss.item()
+                        loss.backward()  
+                        total_loss += loss.item()
+                        # print("\n Total Loss: ", total_loss)
 
     #                     # Clip the gradients to prevent them from getting too large and causing numerical instability
-    #                     torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
+                        torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
 
     #                 # Optimization step: update the model's parameters
     #                 opt.step()
