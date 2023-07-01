@@ -53,7 +53,7 @@ def parse_args(args, **kwargs) -> Munch:
     args = Munch({'epoch': 0}, **args)
     kwargs = Munch({'no_cuda': False, 'debug': False}, **kwargs)
     args.update(kwargs)
-    args.wandb = not kwargs.debug and not args.debug
+    args.wandb = not kwargs.debug and not args.debug and hasattr(args, 'wandb')
     args.device = get_device(args, kwargs.no_cuda)
     args.encoder_structure = args.get('encoder_structure', 'hybrid')
     args.max_dimensions = [args.max_width, args.max_height]
