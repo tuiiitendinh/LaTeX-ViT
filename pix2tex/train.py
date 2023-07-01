@@ -11,7 +11,6 @@ import wandb
 import torch.nn as nn
 from pix2tex.eval import evaluate
 from pix2tex.models import get_model
-# from pix2tex.utils import *
 from pix2tex.utils import in_model_path, parse_args, seed_everything, get_optimizer, get_scheduler, gpu_memory_check
 from pix2tex.utils.loss import SequenceLoss
 
@@ -23,7 +22,6 @@ def train(args):
     valargs.update(batchsize=args.testbatchsize, keep_smaller_batches=True, test=True)
     valdataloader.update(**valargs)
 
-    # add testdata in config file
     testloader = Im2LatexDataset().load(args.testdata)
     testloader.update(**args, test=True)
 
@@ -48,17 +46,7 @@ def train(args):
         if last_epoch:
             filename = os.path.join(out_path, 'final_model.pth')
 
-        # old save function
         torch.save(model.state_dict(), filename)
-
-        # torch.save( {
-        #                 'epoch': e,
-        #                 'step': step,
-        #                 'model': model.state_dict(),
-        #                 'optimizer': opt.state_dict(),
-        #                 'scheduler': scheduler.state_dict(),
-        #                 'map_location': device,
-        #             }, filename)
 
         yaml.dump(dict(args), open(os.path.join(out_path, 'config.yaml'), 'w+'))
         print("Saved model at: ", filename)
@@ -82,69 +70,45 @@ def train(args):
     seq_loss = SequenceLoss(dataloader.tokenizer)
 
     try:
-        # Begin training loop over specified number of epochs
         for e in range(args.epoch, args.epochs):
             args.epoch = e
             dset = tqdm(iter(dataloader))
 
-            # # Reset the CUDA memory allocation tracker at the beginning of each epoch
             torch.cuda.reset_max_memory_allocated(device=device)
             
-            # Iterate over each batch in the dataloader
             for i, (seq, im) in enumerate(dset):
-                # Empty cache after each iteration to free up memory
                 torch.cuda.empty_cache()
 
-                # Check if sequence and image are not None
                 if seq is not None and im is not None:
-                    # Reset optimizer gradients
                     opt.zero_grad()
                     total_loss = 0
 
-                    # Process a portion of the batch at a time (a "microbatch") for memory efficiency
                     for j in range(0, len(im), microbatch):
-                        # Move batch items to GPU
                         tgt_seq, tgt_mask = seq['input_ids'][j:j+microbatch].to(device), seq['attention_mask'][j:j+microbatch].bool().to(device)
-                        # Forward pass: compute predicted outputs and loss by applying the model to the batch
-                        loss = model.data_parallel(im[j:j+microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask)*microbatch/args.batchsize
-                        #print value of loss
-                        # print("\n Loss in parallel: ", loss)
-
-                        #import sequence loss
-                        y, y_hat = tgt_seq, model.generate(im.to(device), temperature=args.get('temperature', .2))
-                        loss = loss * seq_loss(y, y_hat)
-                        # print("\n Loss after get reward: ", loss)
-                        #tính logits y_hat của xi với xi là ảnh input
-                        #tính p_theta(xi|y) với y là chuỗi input
-                        #tính loss (p_theta(y_hat^i|x^i))
-                        #tính reward, store reward variable để tính loss cho policy gradient
+                        parallel_loss = model.data_parallel(im[j:j+microbatch].to(device), device_ids=args.gpu_devices, tgt_seq=tgt_seq, mask=tgt_mask)*microbatch/args.batchsize
                         
-    #                     # Backward pass: compute gradient of the loss with respect to model parameters
+                        # y: label, y_hat: prediction, y_multi_distr: multinimial distribution of predictions in a batch
+                        y, y_hat, y_multi_distr = tgt_seq, model.generate(im.to(device), temperature=args.get('temperature', .2))
+                        loss = seq_loss(y, y_hat, parallel_loss)
+                        
+                        
                         loss.backward()  
                         total_loss += loss.item()
-                        # print("\n Total Loss: ", total_loss)
 
-    #                     # Clip the gradients to prevent them from getting too large and causing numerical instability
                         torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
 
-    #                 # Optimization step: update the model's parameters
     #                 opt.step()
 
-    #                 # Step the learning rate scheduler
     #                 scheduler.step()
 
-    #                 # Display the loss
     #                 dset.set_description('Loss: %.4f' % total_loss)
 
-    #                 # Log the loss and learning rate if wandb logging is enabled
     #                 if args.wandb:
     #                     wandb.log({'train/loss': total_loss})
     #                     wandb.log({'train/lr': scheduler.get_last_lr()[0]})
 
-    #             # Release unoccupied memory
     #             torch.cuda.empty_cache()
 
-    #             # Validate the model after each 'sample_freq' steps
     #             if (i+1+len(dataloader)*e) % args.sample_freq == 0:
     #                 # Switch to evaluation mode
     #                 model.eval()
