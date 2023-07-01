@@ -24,8 +24,9 @@ def train(args):
     valdataloader.update(**valargs)
 
     # add testdata in config file
-    testloader = Im2LatexDataset().load(args.testdata)
-    testloader.update(**args, test=True)
+    if args.test_status:
+        testloader = Im2LatexDataset().load(args.testdata)
+        testloader.update(**args, test=True)
 
     device = args.device
     model = get_model(dataloader, args)

@@ -28,7 +28,7 @@ class CustomARWrapper(AutoregressiveWrapper):
         for _ in range(seq_len):
             x = out[:, -self.max_seq_len:]
             mask = mask[:, -self.max_seq_len:]
-            # print('arw:',out.shape)
+
             logits = self.net(x, mask=mask, **kwargs)[:, -1, :]
 
             if filter_logits_fn in {top_k, top_p}:
