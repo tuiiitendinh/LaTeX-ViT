@@ -22,8 +22,15 @@ def train(args):
     valargs.update(batchsize=args.testbatchsize, keep_smaller_batches=True, test=True)
     valdataloader.update(**valargs)
 
+<<<<<<< HEAD
     testloader = Im2LatexDataset().load(args.testdata)
     testloader.update(**args, test=True)
+=======
+    # add testdata in config file
+    if args.test_status:
+        testloader = Im2LatexDataset().load(args.testdata)
+        testloader.update(**args, test=True)
+>>>>>>> 03f09dd50c90cdf4c8e3b4f3f957e5384e29bfe6
 
     device = args.device
     model = get_model(dataloader, args)

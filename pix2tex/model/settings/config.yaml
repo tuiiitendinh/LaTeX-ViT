@@ -55,4 +55,5 @@ valbatches: 100
 wandb: false
 device: cuda
 valdata: pix2tex/model/dataset/TEST/train.pkl
+test_status: false
 
