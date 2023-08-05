@@ -59,21 +59,8 @@ class Model(nn.Module):
 
     # Define the forward pass
     def forward(self, x: torch.Tensor, tgt_seq: torch.Tensor,  **kwargs):
-        # Run the encoder on the input
         encoded = self.encoder(x)
-        # Run the decoder on the target sequence and the encoded context
         out = self.decoder(tgt_seq, context=encoded, **kwargs)
-        # genarate = self.generate(x)        
-        # # pred = detokenize(genarate, self.dataset.tokenizer)
-        # # tgt = detokenize(tgt_seq, self.dataset.tokenizer)
-        # # avarage_bleu = 0
-        # # for i in range(len(pred)):
-        # #     avarage_bleu += bleu_score([pred[i]], [[tgt[i]]])
-        # # bleu = avarage_bleu/len(pred)
-        # # print("Reward Score: ", bleu)
-
-        # Return the output
-        # return out*(1-bleu)
         return out
 
     # Define a method for generating output sequences without calculating gradients
