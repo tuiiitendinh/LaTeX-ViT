@@ -61,7 +61,7 @@ class CustomARWrapper(AutoregressiveWrapper):
         #remove start tokens
         out = out[:, t:]
         out_20 = out_20[:, t:]
-
+        
         if num_dims == 1:
             out = out.squeeze(0)
             out_20 = out_20.squeeze(0)

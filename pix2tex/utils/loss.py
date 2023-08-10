@@ -16,6 +16,46 @@ class SequenceLoss(nn.Module):
         y = detokenize(y, self.tokenizer)
         y_hat = detokenize(y_hat, self.tokenizer)
         y_tilde = detokenize(y_tilde, self.tokenizer)
+
+        # print("groundtruth: ", y)
+        # print("predicted: ", y_hat)
+        # print("multi_pred: ", y_tilde)
+
+        # Calculate the BLEU score
+        reward = 0
+        for i in range(0, len(y_tilde), 20):
+            reward += metrics.bleu_score([y_tilde[i]], [[y[i//20]]])  # Compare y_tilde[i] with y[i//20] as reference
+        
+        reward /= len(y_tilde) // 20  # Calculate the average reward
+        # print("--- reward: ", reward)    
+
+        # Calculate the reward score for y_tilde
+        score_lst = []
+        for i in range(0, len(y_tilde), 20):
+            tmp = []
+            for j in range(0, 20):
+                tmp.append(metrics.bleu_score([y_tilde[i+j]], [[y[i//20]]]))
+            score_lst.append(tmp)
+
+        score_lst = np.array(score_lst)
+        r_bar = torch.mean(torch.tensor(score_lst))
+        
+        res = loss * (reward - r_bar)
+
+        return res
+
+
+
+old_class = '''
+class SequenceLoss(nn.Module):
+    def __init__(self, tokenizer):
+        super().__init__()
+        self.tokenizer = tokenizer
+    
+    def forward(self, y, y_hat, y_tilde, loss):
+        y = detokenize(y, self.tokenizer)
+        y_hat = detokenize(y_hat, self.tokenizer)
+        y_tilde = detokenize(y_tilde, self.tokenizer)
         
         #sampling y_tilde to get the same shape with groundtruth
         # y & y_hat has the shape of [batch_size, seq_len]
@@ -55,3 +95,4 @@ class SequenceLoss(nn.Module):
         res = loss * (reward - r_bar)
         print(f"{loss} * {reward} - {r_bar} = {res}")
         return res
+'''
