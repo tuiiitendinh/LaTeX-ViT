@@ -26,7 +26,6 @@ class CustomARWrapper(AutoregressiveWrapper):
 
         out_20 = start_tokens.repeat_interleave(20, dim=0)
 
-
         mask = kwargs.pop('mask', None)
         
         if mask is None:
@@ -42,19 +41,16 @@ class CustomARWrapper(AutoregressiveWrapper):
                 filtered_logits = filter_logits_fn(logits, thres=filter_thres)
                 probs = F.softmax(filtered_logits / temperature, dim=-1)
 
-            sample_1 = torch.multinomial(probs, 1)
+            sample_1 = torch.multinomial(probs, 1, replacement=True)
 
-            sample_20 = torch.multinomial(probs, 20)
+            sample_20 = torch.multinomial(probs, 20, replacement=True)
             sample_20 = sample_20.reshape(-1, 1)
           
             out = torch.cat((out, sample_1), dim=-1)
             out_20 = torch.cat((out_20, sample_20), dim=-1)
 
-
             mask = F.pad(mask, (0, 1), value=True)
-            #create mask for out_20
-            mask_20 = F.pad(mask, (0, 20), value=True)
-
+            
             if eos_token is not None and (torch.cumsum(out == eos_token, 1)[:, -1] >= 1).all():
                 break
          
