@@ -1,41 +1,19 @@
 # LaTeX-OCR with ViT
 
+## Prepare data
+* Install a couple of dependencies by changing directory to the LaTeX-ViT folder and run 
+
+  ```pip install -r requirements.txt```
+
+
+* Run ```./create_data.sh``` for data generation
+
+
+* Edit the `data`, `valdata` and `test_data` entry in the config file to the newly generated `.pkl` file. Change other hyperparameters if you want to. See `pix2tex/model/settings/config-hybird.yaml` for a template.
 
 ## Training the model 
 
-* Install a couple of dependencies by changing directory to the LaTeX-ViT folder and run `pip install -r requirements.txt`.
-
-
-For example on Kaggle:
-```
-%cd /kaggle/working/LaTeX-ViT
-!pip install -r requirements.txt
-```
-
-1. Firstly, we have to generate the ```.json``` file for the tokenizer from ```PretrainedTokenizerFast```
-```
-python -m pix2tex.dataset.dataset -e <path_to_label_files> -s 8000 -o <output_json_file>
-```
-
-_**Important**_: the ```.json``` file MUST be named as ```tokenizer.json``` and put in the same folder with the ```.pkl``` file. It should be placed in the ```pix2tex/model/dataset``` folder.
-
-
-2. After that, we need to combine the images with their ground truth labels. This step is applying for the ```train, valid``` and ```test``` data. 
-
-To generate the dataset pickle file run:
-
-```
-python -m pix2tex.dataset.dataset -i <path_to_image_folder> -e <path_to_label_files> -o <output_pkl_file>
-```
-Eg: 
-```
-python -m pix2tex.dataset.dataset -i /kaggle/working/im2tex_data/train -e /kaggle/working/im2tex_data/labels.txt -o pix2tex/model/dataset/train.pkl
-```
-
-
-3. Edit the `data`, `valdata` and `test_data` entry in the config file to the newly generated `.pkl` file. Change other hyperparameters if you want to. See `pix2tex/model/settings/config-hybird.yaml` for a template.
-
-4. Now for the actual training run 
+*  Now for the actual training run 
 ```
 python -m pix2tex.train --config path_to_config_file
 ```
